@@ -1,0 +1,93 @@
+[
+  {
+    "name": "Pit Straight",
+    "s_start_m": 6010,
+    "s_end_m": 202,
+    "wraps_lap": true,
+    "length_m": 405,
+    "end_to_end_chord_m": 404.977,
+    "max_abs_curvature_per_m": 0.00121995,
+    "elevation_change_m": 9.109793,
+    "mean_gradient_percent": 2.249332,
+    "boundary_quality": "estimated_tangent_zone",
+    "note": "Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+  },
+  {
+    "name": "Mountain Straight",
+    "s_start_m": 296,
+    "s_end_m": 1303,
+    "wraps_lap": false,
+    "length_m": 1007,
+    "end_to_end_chord_m": 1006.984,
+    "max_abs_curvature_per_m": 0.00102328,
+    "elevation_change_m": 48.466746,
+    "mean_gradient_percent": 4.812984,
+    "boundary_quality": "estimated_tangent_zone",
+    "note": "Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+  },
+  {
+    "name": "Griffin to Cutting approach",
+    "s_start_m": 1515,
+    "s_end_m": 1710,
+    "wraps_lap": false,
+    "length_m": 195,
+    "end_to_end_chord_m": 194.98,
+    "max_abs_curvature_per_m": 0.00055334,
+    "elevation_change_m": 23.046495,
+    "mean_gradient_percent": 11.818715,
+    "boundary_quality": "estimated_tangent_zone",
+    "note": "Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+  },
+  {
+    "name": "McPhillamy to Skyline run",
+    "s_start_m": 2950,
+    "s_end_m": 3130,
+    "wraps_lap": false,
+    "length_m": 180,
+    "end_to_end_chord_m": 179.977,
+    "max_abs_curvature_per_m": 0.00161114,
+    "elevation_change_m": -2.727559,
+    "mean_gradient_percent": -1.515311,
+    "boundary_quality": "estimated_tangent_zone",
+    "note": "Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+  },
+  {
+    "name": "Conrod uninterrupted fast run",
+    "s_start_m": 4035,
+    "s_end_m": 5075,
+    "wraps_lap": false,
+    "length_m": 1040,
+    "end_to_end_chord_m": 1039.971,
+    "max_abs_curvature_per_m": 0.00102929,
+    "elevation_change_m": -42.056994,
+    "mean_gradient_percent": -4.043942,
+    "boundary_quality": "estimated_tangent_zone",
+    "note": "Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+  },
+  {
+    "name": "The Chase approach after kink",
+    "s_start_m": 5150,
+    "s_end_m": 5335,
+    "wraps_lap": false,
+    "length_m": 185,
+    "end_to_end_chord_m": 185.0,
+    "max_abs_curvature_per_m": 0.000395,
+    "elevation_change_m": -4.745035,
+    "mean_gradient_percent": -2.564884,
+    "boundary_quality": "estimated_tangent_zone",
+    "note": "Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+  },
+  {
+    "name": "The Chase exit to Murray",
+    "s_start_m": 5550,
+    "s_end_m": 5900,
+    "wraps_lap": false,
+    "length_m": 350,
+    "end_to_end_chord_m": 349.987,
+    "max_abs_curvature_per_m": 0.00055413,
+    "elevation_change_m": -14.660186,
+    "mean_gradient_percent": -4.188625,
+    "boundary_quality": "estimated_tangent_zone",
+    "note": "Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+  }
+]

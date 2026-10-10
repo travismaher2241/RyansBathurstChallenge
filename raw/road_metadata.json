@@ -1,0 +1,1606 @@
+{
+ "currentVersion": 10.91,
+ "cimVersion": "2.9.0",
+ "id": 5,
+ "name": "RoadSegment",
+ "type": "Feature Layer",
+ "parentLayer": null,
+ "defaultVisibility": true,
+ "minScale": 100000,
+ "maxScale": 0,
+ "canScaleSymbols": false,
+ "geometryType": "esriGeometryPolyline",
+ "description": "",
+ "copyrightText": "",
+ "editFieldsInfo": null,
+ "ownershipBasedAccessControlForFeatures": null,
+ "syncCanReturnChanges": false,
+ "relationships": [],
+ "isDataVersioned": false,
+ "isDataArchived": false,
+ "infoInEstimates": [
+  "extent",
+  "count"
+ ],
+ "isDataBranchVersioned": false,
+ "isDataReplicaTracked": false,
+ "isCoGoEnabled": false,
+ "supportsRollbackOnFailureParameter": true,
+ "archivingInfo": {
+  "supportsQueryWithHistoricMoment": false,
+  "startArchivingMoment": -1
+ },
+ "supportsStatistics": true,
+ "supportsExceedsLimitStatistics": true,
+ "supportsAdvancedQueries": true,
+ "supportsValidateSQL": true,
+ "supportsCoordinatesQuantization": true,
+ "supportsQuantizationEditMode": true,
+ "supportsCalculate": true,
+ "supportsASyncCalculate": true,
+ "supportsDatumTransformation": true,
+ "advancedQueryCapabilities": {
+  "supportsPagination": true,
+  "supportsTrueCurve": true,
+  "supportsQueryWithDistance": true,
+  "supportsReturningQueryExtent": true,
+  "supportsStatistics": true,
+  "supportsPercentileStatistics": true,
+  "supportsHavingClause": true,
+  "supportsOrderBy": true,
+  "supportsDistinct": true,
+  "supportsCountDistinct": true,
+  "supportsQueryWithResultType": true,
+  "supportsReturningGeometryCentroid": false,
+  "supportsSqlExpression": true,
+  "supportsQueryWithDatumTransformation": true,
+  "supportsLod": false,
+  "supportsQueryWithLodSR": false,
+  "supportsQueryAnalytic": false
+ },
+ "advancedEditingCapabilities": {
+  "supportedSqlFormatsInCalculate": [
+   "standard"
+  ],
+  "supportsAsyncApplyEdits": true
+ },
+ "hasGeometryProperties": true,
+ "geometryProperties": {
+  "shapeLengthFieldName": "Shape__Length",
+  "units": "esriMeters"
+ },
+ "hasMetadata": true,
+ "extent": {
+  "xmin": 1.56941959067E7,
+  "ymin": -4509636.2804999985,
+  "xmax": 1.77106979564E7,
+  "ymax": -3264118.5535000004,
+  "spatialReference": {
+   "wkid": 102100,
+   "latestWkid": 3857,
+   "xyTolerance": 0.001,
+   "zTolerance": 0.001,
+   "mTolerance": 0.001,
+   "falseX": -20037700,
+   "falseY": -30241100,
+   "xyUnits": 10000,
+   "falseZ": -100000,
+   "zUnits": 10000,
+   "falseM": -100000,
+   "mUnits": 10000
+  }
+ },
+ "sourceSpatialReference": {
+  "wkid": 102100,
+  "latestWkid": 3857,
+  "xyTolerance": 0.001,
+  "zTolerance": 0.001,
+  "mTolerance": 0.001,
+  "falseX": -20037700,
+  "falseY": -30241100,
+  "xyUnits": 10000,
+  "falseZ": -100000,
+  "zUnits": 10000,
+  "falseM": -100000,
+  "mUnits": 10000
+ },
+ "drawingInfo": {
+  "renderer": {
+   "type": "simple",
+   "symbol": {
+    "type": "esriSLS",
+    "style": "esriSLSSolid",
+    "color": [
+     163,
+     142,
+     81,
+     255
+    ],
+    "width": 1
+   }
+  },
+  "scaleSymbols": true,
+  "transparency": 0,
+  "labelingInfo": null
+ },
+ "hasM": false,
+ "hasZ": true,
+ "enableZDefaults": false,
+ "supportsVCSProjection": true,
+ "allowGeometryUpdates": false,
+ "allowTrueCurvesUpdates": true,
+ "onlyAllowTrueCurveUpdatesByTrueCurveClients": true,
+ "hasAttachments": false,
+ "supportsApplyEditsWithGlobalIds": false,
+ "htmlPopupType": "esriServerHTMLPopupTypeAsHTMLText",
+ "objectIdField": "objectid",
+ "globalIdField": "",
+ "displayField": "roadnameoid",
+ "typeIdField": "",
+ "subtypeField": "ClassSubtype",
+ "defaultSubtypeCode": 1,
+ "fields": [
+  {
+   "name": "objectid",
+   "type": "esriFieldTypeOID",
+   "alias": "RID",
+   "domain": null,
+   "editable": false,
+   "nullable": false,
+   "defaultValue": null,
+   "modelName": "RID"
+  },
+  {
+   "name": "topoid",
+   "type": "esriFieldTypeInteger",
+   "alias": "TopoID",
+   "domain": {
+    "type": "range",
+    "name": "DmT_TopoID_Range",
+    "description": "",
+    "range": [
+     0,
+     999999999
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDefaultValue"
+   },
+   "editable": true,
+   "nullable": true,
+   "defaultValue": 0,
+   "modelName": "TopoID"
+  },
+  {
+   "name": "createdate",
+   "type": "esriFieldTypeDate",
+   "alias": "createdate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "createdate"
+  },
+  {
+   "name": "objectmoddate",
+   "type": "esriFieldTypeDate",
+   "alias": "objectmoddate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "objectmoddate"
+  },
+  {
+   "name": "featuremoddate",
+   "type": "esriFieldTypeDate",
+   "alias": "featuremoddate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "featuremoddate"
+  },
+  {
+   "name": "classsubtype",
+   "type": "esriFieldTypeInteger",
+   "alias": "ClassSubtype",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": 1,
+   "modelName": "ClassSubtype"
+  },
+  {
+   "name": "featurereliabilitydate",
+   "type": "esriFieldTypeDate",
+   "alias": "featurereliabilitydate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "featurereliabilitydate"
+  },
+  {
+   "name": "attributereliabilitydate",
+   "type": "esriFieldTypeDate",
+   "alias": "attributereliabilitydate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "attributereliabilitydate"
+  },
+  {
+   "name": "capturesourcecode",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "capturesourcecode",
+   "domain": {
+    "type": "codedValue",
+    "name": "DmT_CaptureSource",
+    "description": "",
+    "codedValues": [
+     {
+      "name": "Original 1:25000 Mapping Program",
+      "code": 1
+     },
+     {
+      "name": "First PSMA Capture Program",
+      "code": 2
+     },
+     {
+      "name": "Penguin Rd Atlas Capture Program",
+      "code": 3
+     },
+     {
+      "name": "Standard Topographic Capture Program",
+      "code": 4
+     },
+     {
+      "name": "Original 1:50000 Mapping Program",
+      "code": 5
+     },
+     {
+      "name": "Original 1:100000 Mapping Program",
+      "code": 6
+     },
+     {
+      "name": "RFS Field Update Program",
+      "code": 7
+     },
+     {
+      "name": "ABS Cen2001 Update Program",
+      "code": 8
+     },
+     {
+      "name": "Western Div. Capture  Program",
+      "code": 9
+     },
+     {
+      "name": "State Forests Data Integration Program",
+      "code": 10
+     },
+     {
+      "name": "NPWS Data Integration Program",
+      "code": 11
+     },
+     {
+      "name": "ACT Govt Data Integration Program",
+      "code": 12
+     },
+     {
+      "name": "Large Scale 1 metre Contour Interval Mapping",
+      "code": 13
+     },
+     {
+      "name": "Large Scale 2 metre Contour Interval Mapping",
+      "code": 14
+     },
+     {
+      "name": "DTM Derived Small Scale Contours",
+      "code": 15
+     },
+     {
+      "name": "LPI DTDB line segments",
+      "code": 16
+     },
+     {
+      "name": "DCDB Road Corridor Centreline Program",
+      "code": 17
+     },
+     {
+      "name": "RIC Railways Integration Program",
+      "code": 19
+     },
+     {
+      "name": "GURAS Roads Update Program",
+      "code": 21
+     },
+     {
+      "name": "Commonwealth Govt (Geoscience Aust) Topo Update Program",
+      "code": 22
+     },
+     {
+      "name": "Crown Land Road Integration Program",
+      "code": 23
+     },
+     {
+      "name": "Murray Irrigation Canal Integration Program",
+      "code": 24
+     },
+     {
+      "name": "RTA Classified Roads Integration Program",
+      "code": 18
+     },
+     {
+      "name": "Local Govt Roads Data Integration Program",
+      "code": 20
+     },
+     {
+      "name": "RTA Non-Classified Roads Integration Program",
+      "code": 25
+     },
+     {
+      "name": "Forests NSW Data Integration Program",
+      "code": 26
+     },
+     {
+      "name": "RTA Roads Pending Validation Program",
+      "code": 27
+     },
+     {
+      "name": "Points of Interest Update Program",
+      "code": 28
+     },
+     {
+      "name": "Hydrography Update Program",
+      "code": 29
+     },
+     {
+      "name": "RFS Notification Edit Service",
+      "code": 30
+     },
+     {
+      "name": "Police NSW",
+      "code": 31
+     },
+     {
+      "name": "Fire and Rescue NSW",
+      "code": 32
+     },
+     {
+      "name": "State Emergency Services NSW",
+      "code": 33
+     },
+     {
+      "name": "Rural Fire Service NSW",
+      "code": 34
+     },
+     {
+      "name": "Surf Life Saving Association NSW",
+      "code": 36
+     },
+     {
+      "name": "Local Council",
+      "code": 37
+     },
+     {
+      "name": "Transport NSW",
+      "code": 38
+     },
+     {
+      "name": "Civil Aviation Safety Authority",
+      "code": 39
+     },
+     {
+      "name": "Roads and Maritime Services NSW",
+      "code": 40
+     },
+     {
+      "name": "Fair Trading NSW",
+      "code": 41
+     },
+     {
+      "name": "Health NSW",
+      "code": 42
+     },
+     {
+      "name": "Clubs NSW",
+      "code": 43
+     },
+     {
+      "name": "Board of Studies NSW",
+      "code": 44
+     },
+     {
+      "name": "Department of Education and Communities NSW",
+      "code": 45
+     },
+     {
+      "name": "Attorney General's Department NSW",
+      "code": 46
+     },
+     {
+      "name": "Department of Foreign Affairs and Trade",
+      "code": 47
+     },
+     {
+      "name": "Corrective Services NSW",
+      "code": 48
+     },
+     {
+      "name": "Department of Local Government NSW",
+      "code": 49
+     },
+     {
+      "name": "Department of Primary Industries NSW",
+      "code": 50
+     },
+     {
+      "name": "Department of Health and Aging",
+      "code": 51
+     },
+     {
+      "name": "Australia Post",
+      "code": 52
+     },
+     {
+      "name": "Trade and Investment NSW",
+      "code": 53
+     },
+     {
+      "name": "Tourism NSW",
+      "code": 54
+     },
+     {
+      "name": "Ambulance NSW",
+      "code": 35
+     }
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDuplicate"
+   },
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "capturesourcecode"
+  },
+  {
+   "name": "capturemethodcode",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "capturemethodcode",
+   "domain": {
+    "type": "codedValue",
+    "name": "DmT_CaptureMethod",
+    "description": "",
+    "codedValues": [
+     {
+      "name": "Undefined",
+      "code": 0
+     },
+     {
+      "name": "Registered Image Trace",
+      "code": 1
+     },
+     {
+      "name": "Ortho Image Trace",
+      "code": 2
+     },
+     {
+      "name": "Table Digitisation",
+      "code": 3
+     },
+     {
+      "name": "DCDB trace",
+      "code": 4
+     },
+     {
+      "name": "Scan / Vectorize",
+      "code": 8
+     },
+     {
+      "name": "Differential GPS",
+      "code": 9
+     },
+     {
+      "name": "Non corrected GPS",
+      "code": 10
+     },
+     {
+      "name": "GPS with estimated correction",
+      "code": 11
+     },
+     {
+      "name": "Comparative estimate (eyeballed)",
+      "code": 12
+     },
+     {
+      "name": "Survey Controlled",
+      "code": 13
+     },
+     {
+      "name": "Mobile GPS",
+      "code": 14
+     },
+     {
+      "name": "Intersection point by FN resection",
+      "code": 15
+     },
+     {
+      "name": "Stereo Image Trace",
+      "code": 16
+     },
+     {
+      "name": "Engineering Design File (CAD)",
+      "code": 18
+     },
+     {
+      "name": "Scanned Map Image Trace",
+      "code": 19
+     },
+     {
+      "name": "Aggregation or replication of existing line segments",
+      "code": 17
+     },
+     {
+      "name": "Positioned within features cadastral or ortho image extent\nPositioned within features cadastral or ortho image extent",
+      "code": 20
+     }
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDuplicate"
+   },
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "capturemethodcode"
+  },
+  {
+   "name": "planimetricaccuracy",
+   "type": "esriFieldTypeSingle",
+   "alias": "planimetricaccuracy",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "planimetricaccuracy"
+  },
+  {
+   "name": "verticalaccuracy",
+   "type": "esriFieldTypeSingle",
+   "alias": "verticalaccuracy",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "verticalaccuracy"
+  },
+  {
+   "name": "operationalstatus",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "OperationalStatus",
+   "domain": {
+    "type": "codedValue",
+    "name": "DmT_BuiltOperationalStatus",
+    "description": "",
+    "codedValues": [
+     {
+      "name": "Operational",
+      "code": 1
+     },
+     {
+      "name": "Proposed",
+      "code": 3
+     },
+     {
+      "name": "Disused",
+      "code": 4
+     },
+     {
+      "name": "Dismantled",
+      "code": 5
+     },
+     {
+      "name": "Closed",
+      "code": 6
+     },
+     {
+      "name": "RestrictPublication",
+      "code": 7
+     },
+     {
+      "name": "UnderConstruction",
+      "code": 2
+     },
+     {
+      "name": "Notional",
+      "code": 8
+     }
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDuplicate"
+   },
+   "editable": true,
+   "nullable": false,
+   "defaultValue": 1,
+   "modelName": "OperationalStatus"
+  },
+  {
+   "name": "roadnameoid",
+   "type": "esriFieldTypeInteger",
+   "alias": "roadnameoid",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "roadnameoid"
+  },
+  {
+   "name": "roadnamebase",
+   "type": "esriFieldTypeString",
+   "alias": "roadnamebase",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 50,
+   "defaultValue": null,
+   "modelName": "roadnamebase"
+  },
+  {
+   "name": "roadnametype",
+   "type": "esriFieldTypeString",
+   "alias": "roadnametype",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 20,
+   "defaultValue": null,
+   "modelName": "roadnametype"
+  },
+  {
+   "name": "roadnamesuffix",
+   "type": "esriFieldTypeString",
+   "alias": "roadnamesuffix",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 10,
+   "defaultValue": null,
+   "modelName": "roadnamesuffix"
+  },
+  {
+   "name": "functionhierarchy",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "FunctionHierarchy",
+   "domain": {
+    "type": "codedValue",
+    "name": "DmT_RoadFunctionHierarchy",
+    "description": "",
+    "codedValues": [
+     {
+      "name": "Motorway",
+      "code": 1
+     },
+     {
+      "name": "PrimaryRoad",
+      "code": 2
+     },
+     {
+      "name": "ArterialRoad",
+      "code": 3
+     },
+     {
+      "name": "SubArterialRoad",
+      "code": 4
+     },
+     {
+      "name": "DistributorRoad",
+      "code": 5
+     },
+     {
+      "name": "LocalRoad",
+      "code": 6
+     },
+     {
+      "name": "UrbanServiceLane",
+      "code": 7
+     },
+     {
+      "name": "Track-Vehicular",
+      "code": 8
+     },
+     {
+      "name": "Path",
+      "code": 9
+     },
+     {
+      "name": "DedicatedBusWay",
+      "code": 10
+     },
+     {
+      "name": "AccessWay",
+      "code": 11
+     }
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDuplicate"
+   },
+   "editable": true,
+   "nullable": false,
+   "defaultValue": 6,
+   "modelName": "FunctionHierarchy"
+  },
+  {
+   "name": "roadontype",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "RoadOnType",
+   "domain": {
+    "type": "codedValue",
+    "name": "DmT_RoadOnType",
+    "description": "",
+    "codedValues": [
+     {
+      "name": "OnGround",
+      "code": 1
+     },
+     {
+      "name": "OnBridge",
+      "code": 2
+     },
+     {
+      "name": "InTunnel",
+      "code": 3
+     },
+     {
+      "name": "OnFloodway",
+      "code": 4
+     },
+     {
+      "name": "OnCulvert",
+      "code": 5
+     },
+     {
+      "name": "OnDamWall",
+      "code": 6
+     },
+     {
+      "name": "ThroughWater",
+      "code": 7
+     },
+     {
+      "name": "OnStairs",
+      "code": 8
+     }
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDuplicate"
+   },
+   "editable": true,
+   "nullable": false,
+   "defaultValue": 1,
+   "modelName": "RoadOnType"
+  },
+  {
+   "name": "surface",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "surface",
+   "domain": {
+    "type": "codedValue",
+    "name": "DmT_RoadSurface",
+    "description": "",
+    "codedValues": [
+     {
+      "name": "UnknownSurface",
+      "code": 0
+     },
+     {
+      "name": "SealedSurface",
+      "code": 1
+     },
+     {
+      "name": "UnsealedSurface",
+      "code": 2
+     },
+     {
+      "name": "Unsealed4WDSurface",
+      "code": 3
+     },
+     {
+      "name": "SF_Unsealed4WDSurface",
+      "code": 4
+     }
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDuplicate"
+   },
+   "editable": true,
+   "nullable": false,
+   "defaultValue": null,
+   "modelName": "surface"
+  },
+  {
+   "name": "lanecount",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "lanecount",
+   "domain": {
+    "type": "codedValue",
+    "name": "DmT_RoadLanesClassification",
+    "description": "",
+    "codedValues": [
+     {
+      "name": "Unknown Lanes",
+      "code": 0
+     },
+     {
+      "name": "OneLane",
+      "code": 1
+     },
+     {
+      "name": "TwoOrMoreLanes",
+      "code": 2
+     }
+    ],
+    "mergePolicy": "esriMPTDefaultValue",
+    "splitPolicy": "esriSPTDuplicate"
+   },
+   "editable": true,
+   "nullable": false,
+   "defaultValue": null,
+   "modelName": "lanecount"
+  },
+  {
+   "name": "roadnameextentoid",
+   "type": "esriFieldTypeInteger",
+   "alias": "roadnameextentoid",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "roadnameextentoid"
+  },
+  {
+   "name": "relevance",
+   "type": "esriFieldTypeSmallInteger",
+   "alias": "relevance",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "relevance"
+  },
+  {
+   "name": "startdate",
+   "type": "esriFieldTypeDate",
+   "alias": "startdate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "startdate"
+  },
+  {
+   "name": "enddate",
+   "type": "esriFieldTypeDate",
+   "alias": "enddate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "enddate"
+  },
+  {
+   "name": "lastupdate",
+   "type": "esriFieldTypeDate",
+   "alias": "lastupdate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 8,
+   "defaultValue": null,
+   "modelName": "lastupdate"
+  },
+  {
+   "name": "msoid",
+   "type": "esriFieldTypeInteger",
+   "alias": "msoid",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "msoid"
+  },
+  {
+   "name": "centroidid",
+   "type": "esriFieldTypeInteger",
+   "alias": "centroidid",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "centroidid"
+  },
+  {
+   "name": "shapeuuid",
+   "type": "esriFieldTypeString",
+   "alias": "shapeuuid",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 38,
+   "defaultValue": null,
+   "modelName": "shapeuuid"
+  },
+  {
+   "name": "changetype",
+   "type": "esriFieldTypeString",
+   "alias": "changetype",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 2,
+   "defaultValue": null,
+   "modelName": "changetype"
+  },
+  {
+   "name": "processstate",
+   "type": "esriFieldTypeString",
+   "alias": "processstate",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 5,
+   "defaultValue": null,
+   "modelName": "processstate"
+  },
+  {
+   "name": "urbanity",
+   "type": "esriFieldTypeString",
+   "alias": "urbanity",
+   "domain": null,
+   "editable": true,
+   "nullable": true,
+   "length": 2,
+   "defaultValue": null,
+   "modelName": "urbanity"
+  },
+  {
+   "name": "Shape__Length",
+   "type": "esriFieldTypeDouble",
+   "alias": "shape_Length",
+   "domain": null,
+   "editable": false,
+   "nullable": true,
+   "defaultValue": null,
+   "modelName": "shape_Length"
+  }
+ ],
+ "geometryField": {
+  "name": "shape",
+  "type": "esriFieldTypeGeometry",
+  "alias": "Shape",
+  "domain": null,
+  "editable": false,
+  "nullable": true,
+  "defaultValue": null,
+  "modelName": "Shape"
+ },
+ "indexes": [
+  {
+   "name": "FDO_objectid",
+   "fields": "objectid",
+   "isAscending": true,
+   "isUnique": true,
+   "description": ""
+  },
+  {
+   "name": "I75startdate",
+   "fields": "startdate",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75enddate",
+   "fields": "enddate",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75lastupdate",
+   "fields": "lastupdate",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75msoid",
+   "fields": "msoid",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75centroidid",
+   "fields": "centroidid",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75shapeuuid",
+   "fields": "shapeuuid",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75changetype",
+   "fields": "changetype",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75processstate",
+   "fields": "processstate",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75urbanity",
+   "fields": "urbanity",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I75urbanity_1",
+   "fields": "urbanity",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_roadnamebase",
+   "fields": "roadnamebase",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_roadnamesuffix",
+   "fields": "roadnamesuffix",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_roadnametype",
+   "fields": "roadnametype",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_roadnameextentoid",
+   "fields": "roadnameextentoid",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_roadontype",
+   "fields": "roadontype",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_featuremoddate",
+   "fields": "featuremoddate",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_topoid",
+   "fields": "topoid",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_relevance",
+   "fields": "relevance",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_surface",
+   "fields": "surface",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_objectmoddate",
+   "fields": "objectmoddate",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_capturesourcecode",
+   "fields": "capturesourcecode",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_roadnameoid",
+   "fields": "roadnameoid",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_lanecount",
+   "fields": "lanecount",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_classsubtype",
+   "fields": "classsubtype",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_createdate",
+   "fields": "createdate",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_functionhierarchy",
+   "fields": "functionhierarchy",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "idx_operationalstatus",
+   "fields": "operationalstatus",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "shape_INDEX",
+   "fields": "shape",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  }
+ ],
+ "datesInUnknownTimezone": false,
+ "dateFieldsTimeReference": {
+  "timeZone": "UTC",
+  "respectsDaylightSaving": false
+ },
+ "preferredTimeReference": null,
+ "types": [],
+ "templates": [
+  {
+   "name": "RoadSegment",
+   "description": "",
+   "prototype": {
+    "attributes": {
+     "urbanity": null,
+     "processstate": null,
+     "topoid": 0,
+     "createdate": null,
+     "objectmoddate": null,
+     "featuremoddate": null,
+     "classsubtype": 1,
+     "featurereliabilitydate": null,
+     "attributereliabilitydate": null,
+     "capturesourcecode": null,
+     "capturemethodcode": null,
+     "planimetricaccuracy": null,
+     "verticalaccuracy": null,
+     "operationalstatus": 1,
+     "roadnameoid": null,
+     "roadnamebase": null,
+     "roadnametype": null,
+     "roadnamesuffix": null,
+     "functionhierarchy": 6,
+     "roadontype": 1,
+     "surface": 0,
+     "lanecount": 0,
+     "roadnameextentoid": null,
+     "relevance": null,
+     "startdate": null,
+     "enddate": null,
+     "lastupdate": null,
+     "msoid": null,
+     "centroidid": null,
+     "shapeuuid": null,
+     "changetype": null
+    }
+   },
+   "drawingTool": "esriFeatureEditToolLine"
+  }
+ ],
+ "subtypes": [
+  {
+   "code": 8,
+   "name": "ContinuityLine",
+   "defaultValues": {
+    "topoid": 0,
+    "createdate": null,
+    "objectmoddate": null,
+    "featuremoddate": null,
+    "classsubtype": 8,
+    "featurereliabilitydate": null,
+    "attributereliabilitydate": null,
+    "capturesourcecode": null,
+    "capturemethodcode": null,
+    "planimetricaccuracy": null,
+    "verticalaccuracy": null,
+    "operationalstatus": 1,
+    "roadnameoid": null,
+    "roadnamebase": null,
+    "roadnametype": null,
+    "roadnamesuffix": null,
+    "functionhierarchy": 6,
+    "roadontype": 1,
+    "surface": null,
+    "lanecount": null,
+    "roadnameextentoid": null,
+    "relevance": null,
+    "startdate": null,
+    "enddate": null,
+    "lastupdate": null,
+    "msoid": null,
+    "centroidid": null,
+    "shapeuuid": null,
+    "changetype": null,
+    "processstate": null,
+    "urbanity": null,
+    "shape_Length": null
+   },
+   "domains": {
+    "topoid": {"type": "inherited"},
+    "capturesourcecode": {"type": "inherited"},
+    "capturemethodcode": {"type": "inherited"},
+    "operationalstatus": {"type": "inherited"},
+    "functionhierarchy": {"type": "inherited"},
+    "roadontype": {"type": "inherited"},
+    "surface": {"type": "inherited"},
+    "lanecount": {"type": "inherited"}
+   }
+  },
+  {
+   "code": 5,
+   "name": "VehicularTrack",
+   "defaultValues": {
+    "topoid": 0,
+    "createdate": null,
+    "objectmoddate": null,
+    "featuremoddate": null,
+    "classsubtype": 5,
+    "featurereliabilitydate": null,
+    "attributereliabilitydate": null,
+    "capturesourcecode": null,
+    "capturemethodcode": null,
+    "planimetricaccuracy": null,
+    "verticalaccuracy": null,
+    "operationalstatus": 1,
+    "roadnameoid": null,
+    "roadnamebase": null,
+    "roadnametype": null,
+    "roadnamesuffix": null,
+    "functionhierarchy": 6,
+    "roadontype": 1,
+    "surface": null,
+    "lanecount": null,
+    "roadnameextentoid": null,
+    "relevance": null,
+    "startdate": null,
+    "enddate": null,
+    "lastupdate": null,
+    "msoid": null,
+    "centroidid": null,
+    "shapeuuid": null,
+    "changetype": null,
+    "processstate": null,
+    "urbanity": null,
+    "shape_Length": null
+   },
+   "domains": {
+    "topoid": {"type": "inherited"},
+    "capturesourcecode": {"type": "inherited"},
+    "capturemethodcode": {"type": "inherited"},
+    "operationalstatus": {"type": "inherited"},
+    "functionhierarchy": {"type": "inherited"},
+    "roadontype": {"type": "inherited"},
+    "surface": {"type": "inherited"},
+    "lanecount": {"type": "inherited"}
+   }
+  },
+  {
+   "code": 2,
+   "name": "OnOffRamp",
+   "defaultValues": {
+    "topoid": 0,
+    "createdate": null,
+    "objectmoddate": null,
+    "featuremoddate": null,
+    "classsubtype": 2,
+    "featurereliabilitydate": null,
+    "attributereliabilitydate": null,
+    "capturesourcecode": null,
+    "capturemethodcode": null,
+    "planimetricaccuracy": null,
+    "verticalaccuracy": null,
+    "operationalstatus": 1,
+    "roadnameoid": null,
+    "roadnamebase": null,
+    "roadnametype": null,
+    "roadnamesuffix": null,
+    "functionhierarchy": 6,
+    "roadontype": 1,
+    "surface": null,
+    "lanecount": null,
+    "roadnameextentoid": null,
+    "relevance": null,
+    "startdate": null,
+    "enddate": null,
+    "lastupdate": null,
+    "msoid": null,
+    "centroidid": null,
+    "shapeuuid": null,
+    "changetype": null,
+    "processstate": null,
+    "urbanity": null,
+    "shape_Length": null
+   },
+   "domains": {
+    "topoid": {"type": "inherited"},
+    "capturesourcecode": {"type": "inherited"},
+    "capturemethodcode": {"type": "inherited"},
+    "operationalstatus": {"type": "inherited"},
+    "functionhierarchy": {"type": "inherited"},
+    "roadontype": {"type": "inherited"},
+    "surface": {"type": "inherited"},
+    "lanecount": {"type": "inherited"}
+   }
+  },
+  {
+   "code": 3,
+   "name": "DualCarriageway",
+   "defaultValues": {
+    "topoid": 0,
+    "createdate": null,
+    "objectmoddate": null,
+    "featuremoddate": null,
+    "classsubtype": 3,
+    "featurereliabilitydate": null,
+    "attributereliabilitydate": null,
+    "capturesourcecode": null,
+    "capturemethodcode": null,
+    "planimetricaccuracy": null,
+    "verticalaccuracy": null,
+    "operationalstatus": 1,
+    "roadnameoid": null,
+    "roadnamebase": null,
+    "roadnametype": null,
+    "roadnamesuffix": null,
+    "functionhierarchy": 6,
+    "roadontype": 1,
+    "surface": null,
+    "lanecount": null,
+    "roadnameextentoid": null,
+    "relevance": null,
+    "startdate": null,
+    "enddate": null,
+    "lastupdate": null,
+    "msoid": null,
+    "centroidid": null,
+    "shapeuuid": null,
+    "changetype": null,
+    "processstate": null,
+    "urbanity": null,
+    "shape_Length": null
+   },
+   "domains": {
+    "topoid": {"type": "inherited"},
+    "capturesourcecode": {"type": "inherited"},
+    "capturemethodcode": {"type": "inherited"},
+    "operationalstatus": {"type": "inherited"},
+    "functionhierarchy": {"type": "inherited"},
+    "roadontype": {"type": "inherited"},
+    "surface": {"type": "inherited"},
+    "lanecount": {"type": "inherited"}
+   }
+  },
+  {
+   "code": 6,
+   "name": "Pathway",
+   "defaultValues": {
+    "topoid": 0,
+    "createdate": null,
+    "objectmoddate": null,
+    "featuremoddate": null,
+    "classsubtype": 6,
+    "featurereliabilitydate": null,
+    "attributereliabilitydate": null,
+    "capturesourcecode": null,
+    "capturemethodcode": null,
+    "planimetricaccuracy": null,
+    "verticalaccuracy": null,
+    "operationalstatus": 1,
+    "roadnameoid": null,
+    "roadnamebase": null,
+    "roadnametype": null,
+    "roadnamesuffix": null,
+    "functionhierarchy": 6,
+    "roadontype": 1,
+    "surface": null,
+    "lanecount": null,
+    "roadnameextentoid": null,
+    "relevance": null,
+    "startdate": null,
+    "enddate": null,
+    "lastupdate": null,
+    "msoid": null,
+    "centroidid": null,
+    "shapeuuid": null,
+    "changetype": null,
+    "processstate": null,
+    "urbanity": null,
+    "shape_Length": null
+   },
+   "domains": {
+    "topoid": {"type": "inherited"},
+    "capturesourcecode": {"type": "inherited"},
+    "capturemethodcode": {"type": "inherited"},
+    "operationalstatus": {"type": "inherited"},
+    "functionhierarchy": {"type": "inherited"},
+    "roadontype": {"type": "inherited"},
+    "surface": {"type": "inherited"},
+    "lanecount": {"type": "inherited"}
+   }
+  },
+  {
+   "code": 1,
+   "name": "StandardRoad",
+   "defaultValues": {
+    "topoid": 0,
+    "createdate": null,
+    "objectmoddate": null,
+    "featuremoddate": null,
+    "classsubtype": 1,
+    "featurereliabilitydate": null,
+    "attributereliabilitydate": null,
+    "capturesourcecode": null,
+    "capturemethodcode": null,
+    "planimetricaccuracy": null,
+    "verticalaccuracy": null,
+    "operationalstatus": 1,
+    "roadnameoid": null,
+    "roadnamebase": null,
+    "roadnametype": null,
+    "roadnamesuffix": null,
+    "functionhierarchy": 6,
+    "roadontype": 1,
+    "surface": null,
+    "lanecount": null,
+    "roadnameextentoid": null,
+    "relevance": null,
+    "startdate": null,
+    "enddate": null,
+    "lastupdate": null,
+    "msoid": null,
+    "centroidid": null,
+    "shapeuuid": null,
+    "changetype": null,
+    "processstate": null,
+    "urbanity": null,
+    "shape_Length": null
+   },
+   "domains": {
+    "topoid": {"type": "inherited"},
+    "capturesourcecode": {"type": "inherited"},
+    "capturemethodcode": {"type": "inherited"},
+    "operationalstatus": {"type": "inherited"},
+    "functionhierarchy": {"type": "inherited"},
+    "roadontype": {"type": "inherited"},
+    "surface": {"type": "inherited"},
+    "lanecount": {"type": "inherited"}
+   }
+  },
+  {
+   "code": 4,
+   "name": "Roundabout",
+   "defaultValues": {
+    "topoid": 0,
+    "createdate": null,
+    "objectmoddate": null,
+    "featuremoddate": null,
+    "classsubtype": 4,
+    "featurereliabilitydate": null,
+    "attributereliabilitydate": null,
+    "capturesourcecode": null,
+    "capturemethodcode": null,
+    "planimetricaccuracy": null,
+    "verticalaccuracy": null,
+    "operationalstatus": 1,
+    "roadnameoid": null,
+    "roadnamebase": null,
+    "roadnametype": null,
+    "roadnamesuffix": null,
+    "functionhierarchy": 6,
+    "roadontype": 1,
+    "surface": null,
+    "lanecount": null,
+    "roadnameextentoid": null,
+    "relevance": null,
+    "startdate": null,
+    "enddate": null,
+    "lastupdate": null,
+    "msoid": null,
+    "centroidid": null,
+    "shapeuuid": null,
+    "changetype": null,
+    "processstate": null,
+    "urbanity": null,
+    "shape_Length": null
+   },
+   "domains": {
+    "topoid": {"type": "inherited"},
+    "capturesourcecode": {"type": "inherited"},
+    "capturemethodcode": {"type": "inherited"},
+    "operationalstatus": {"type": "inherited"},
+    "functionhierarchy": {"type": "inherited"},
+    "roadontype": {"type": "inherited"},
+    "surface": {"type": "inherited"},
+    "lanecount": {"type": "inherited"}
+   }
+  }
+ ],
+ "maxRecordCount": 2000,
+ "supportedQueryFormats": "JSON, geoJSON, PBF",
+ "supportedExportFormats": "sqlite,filegdb",
+ "capabilities": "Query",
+ "useStandardizedQueries": true,
+ "supportedSpatialRelationships": [
+  "esriSpatialRelIntersects",
+  "esriSpatialRelContains",
+  "esriSpatialRelCrosses",
+  "esriSpatialRelEnvelopeIntersects",
+  "esriSpatialRelIndexIntersects",
+  "esriSpatialRelOverlaps",
+  "esriSpatialRelTouches",
+  "esriSpatialRelWithin",
+  "esriSpatialRelRelation"
+ ],
+ "standardMaxRecordCount": 8000,
+ "tileMaxRecordCount": 4000,
+ "standardMaxRecordCountNoGeometry": 32000,
+ "maxRecordCountFactor": 1,
+ "serviceItemId": "010975d9b9594f659df467266528c9be"
+}

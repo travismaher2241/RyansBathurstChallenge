@@ -1,0 +1,11 @@
+type,s_m,elevation_m,area,quality
+crest,975,749.711229,Mountain Straight,DEM_derived_not_surveyed
+crest,2408,870.877514,Sulman Park,DEM_derived_not_surveyed
+crest,2777,874.006422,McPhillamy Park,DEM_derived_not_surveyed
+crest,4624,740.849569,Conrod Straight,DEM_derived_not_surveyed
+crest,5472,717.642449,The Chase,DEM_derived_not_surveyed
+trough,1050,748.540954,Mountain Straight,DEM_derived_not_surveyed
+trough,2513,867.286133,Sulman Park,DEM_derived_not_surveyed
+trough,4446,735.152869,Conrod Straight,DEM_derived_not_surveyed
+trough,5294,713.105758,The Chase,DEM_derived_not_surveyed
+trough,5955,699.918834,Murray’s Corner,DEM_derived_not_surveyed

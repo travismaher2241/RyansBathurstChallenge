@@ -1,0 +1,8 @@
+name,s_start_m,s_end_m,wraps_lap,length_m,end_to_end_chord_m,max_abs_curvature_per_m,elevation_change_m,mean_gradient_percent,boundary_quality,note
+Pit Straight,6010,202,True,405,404.977,0.00121995,9.109793,2.249332,estimated_tangent_zone,"Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+Mountain Straight,296,1303,False,1007,1006.984,0.00102328,48.466746,4.812984,estimated_tangent_zone,"Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+Griffin to Cutting approach,1515,1710,False,195,194.98,0.00055334,23.046495,11.818715,estimated_tangent_zone,"Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+McPhillamy to Skyline run,2950,3130,False,180,179.977,0.00161114,-2.727559,-1.515311,estimated_tangent_zone,"Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+Conrod uninterrupted fast run,4035,5075,False,1040,1039.971,0.00102929,-42.056994,-4.043942,estimated_tangent_zone,"Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+The Chase approach after kink,5150,5335,False,185,185.0,0.000395,-4.745035,-2.564884,estimated_tangent_zone,"Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."
+The Chase exit to Murray,5550,5900,False,350,349.987,0.00055413,-14.660186,-4.188625,estimated_tangent_zone,"Residual mapped curvature retained; this is a driving straight/run, not a mathematical line."

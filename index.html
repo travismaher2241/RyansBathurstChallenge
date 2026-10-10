@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Bathurst Arcade — Mount Panorama</title>
+  <meta name="description" content="Retro pseudo-3D touring car arcade racer set at Mount Panorama, Bathurst (6,213m historic circuit)." />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <meta property="og:title" content="Bathurst Arcade — Mount Panorama" />
+  <meta property="og:description" content="Retro pseudo-3D touring car arcade racing game featuring the full 6,213m Mount Panorama circuit." />
+  <meta property="og:type" content="website" />
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    
+    <!-- Touch Controls Overlay for Mobile -->
+    <div id="touch-controls" class="hidden">
+      <div id="touch-left-zone">
+        <button id="touch-steer-left" class="touch-btn" aria-label="Steer Left">◀</button>
+        <button id="touch-steer-right" class="touch-btn" aria-label="Steer Right">▶</button>
+      </div>
+      <div id="touch-right-zone">
+        <button id="touch-brake" class="touch-btn pedal-btn" aria-label="Brake">BRAKE</button>
+        <button id="touch-gas" class="touch-btn pedal-btn" aria-label="Accelerate">GAS</button>
+      </div>
+      <button id="touch-reset" class="touch-action-btn" aria-label="Reset Car">RESET</button>
+      <button id="touch-pause" class="touch-action-btn" aria-label="Pause">PAUSE</button>
+    </div>
+
+    <!-- UI Overlay for Menus & Dialogs -->
+    <div id="ui-overlay"></div>
+
+    <!-- Rotate Warning for Mobile Portrait -->
+    <div id="rotate-device-overlay" class="hidden">
+      <div class="rotate-content">
+        <div class="rotate-icon">📱 ↷</div>
+        <h2>ROTATE TO LANDSCAPE</h2>
+        <p>Bathurst Arcade is best experienced in landscape mode.</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/index.ts"></script>
+</body>
+</html>

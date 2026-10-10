@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#0b0e14"/>
+  <rect x="6" y="6" width="52" height="52" rx="8" fill="#1d3557" stroke="#ffb703" stroke-width="3"/>
+  <!-- Checkered flag pattern / touring car silhouette -->
+  <path d="M14 44 L20 28 L44 28 L50 44 Z" fill="#ffb703"/>
+  <rect x="22" y="30" width="20" height="7" fill="#0f172a"/>
+  <!-- Racing lights -->
+  <circle cx="18" cy="42" r="3" fill="#ef4444"/>
+  <circle cx="46" cy="42" r="3" fill="#ef4444"/>
+  <!-- Wing -->
+  <rect x="16" y="24" width="32" height="3" fill="#ffffff"/>
+</svg>

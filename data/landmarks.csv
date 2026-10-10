@@ -1,0 +1,21 @@
+id,name,sprite_key,s_m,offset_right_m,game_east_m,game_north_m,longitude_deg,latitude_deg,terrain_elevation_m,terrain_height_relative_m,width_m_estimate,height_m_estimate,position_quality,dimensions_quality,note,collidable
+timing_line,Timing line (estimated),road_line,0,0,0.0,0.0,149.558360004,-33.439282261,706.152295,0.00149,12,0.1,schematic_estimate,estimate,estimated location; distinct from standing-start line,False
+grid_line,Standing-start line (illustrative),road_line,90,0,-88.86358,14.257072,149.557411801,-33.439154732,707.349069,1.198264,12,0.1,schematic_estimate,estimate,estimated separation; no exact grid survey,False
+pit_building,Pit garages,pit_building,6160,-30,46.984141,-38.379825,149.55886134,-33.439625566,706.548436,0.39763,250,14,schematic_estimate,estimate,inside of Pit Straight,False
+pit_paddock,Paddock,paddock,6120,-90,75.059913,-105.054787,149.559160917,-33.44022197,706.432457,0.281652,350,8,schematic_estimate,estimate,organiser event schematic,False
+grandstands,Pit Straight grandstands,grandstand,6160,35,58.491082,26.118993,149.558984122,-33.439048628,705.353961,-0.796844,230,14,schematic_estimate,estimate,outside Pit Straight,False
+museum,National Motor Racing Museum precinct,museum,5930,95,350.737393,-82.21643,149.562102483,-33.440017682,699.229671,-6.921135,40,10,schematic_estimate,estimate,organiser schematic; approximate location,False
+mountain_farms,Mountain Straight rural buildings,farm,900,-55,-306.974107,-622.655904,149.555084493,-33.444851882,743.463153,37.312348,25,7,schematic_estimate,estimate,generic regional scenery; fictional instances,False
+cutting_rock,The Cutting rock face,rock_face,1810,11,-853.573178,-947.765798,149.549252107,-33.447759971,815.362442,109.211636,130,20,schematic_estimate,estimate,area sourced; footprint estimated,True
+reid_camp,Reid and Sulman camping,campground,2150,55,-900.551083,-1225.973113,149.548750838,-33.450248519,866.986726,160.83592,250,4,schematic_estimate,estimate,organiser schematic; estimated extent,False
+mcphillamy_camp,McPhillamy camping,campground,2810,65,-1030.177578,-1809.604108,149.547367682,-33.455469064,873.668575,167.517769,300,4,schematic_estimate,estimate,organiser schematic; estimated extent,False
+skyline_view,Skyline Bathurst vista,vista,3140,100,-669.902819,-1937.392579,149.551211928,-33.456612125,872.166425,166.01562,1000,0,schematic_estimate,estimate,scenic direction approximate,False
+mountain_sign,Mount Panorama hillside lettering,hillside_sign,3180,-75,-609.200715,-1766.409947,149.551859639,-33.455082695,841.176327,135.025522,120,12,schematic_estimate,estimate,organiser schematic places sign inside mountain descent,False
+esses_walls,Mountain descent barriers,barrier_zone,3340,6,-480.281868,-1885.197082,149.553235244,-33.456145239,845.701402,139.550597,500,1.1,schematic_estimate,estimate,estimated wall offset and height,True
+elbow_wall,Forrest’s Elbow outside wall,barrier,3750,6,-177.260698,-2138.46761,149.556468576,-33.458410729,798.441684,92.290879,90,1.1,schematic_estimate,estimate,estimated dimensions,True
+conrod_crest,Conrod crest (DEM derived),crest_marker,4624,0,65.071695,-1330.275351,149.55905434,-33.451181496,740.896876,34.746071,0,0,DEM_derived_marker,estimate,profile sample; see elevation extrema for actual crests,False
+chase_gravel,The Chase gravel/runoff,gravel,5390,30,279.157413,-587.420038,149.561338702,-33.444536699,716.481399,10.330594,110,0,schematic_estimate,estimate,organiser layout; estimated extent,False
+hotel,Rydges Mount Panorama hotel,hotel,5510,80,274.857138,-490.109266,149.561292817,-33.44366626,717.121162,10.970356,100,22,schematic_estimate,estimate,outside lower Conrod / Chase; schematic location,False
+conrod_bridge,Lower Conrod pedestrian bridge,bridge,5660,0,213.877433,-342.078289,149.560642144,-33.442342131,713.487684,7.336879,22,7,schematic_estimate,estimate,organiser schematic; estimated station and clearance,False
+pit_bridge,Pit precinct pedestrian bridge,bridge,6060,0,150.739595,-26.147977,149.559968443,-33.439516153,703.452952,-2.697854,22,7,schematic_estimate,estimate,organiser schematic; estimated station and clearance,False
+orchard_camp,Orchard and Chase camping,campground,4950,100,213.794596,-1022.280868,149.56064126,-33.448426504,724.31793,18.167124,450,4,schematic_estimate,estimate,organiser schematic; estimated extent,False

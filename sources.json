@@ -1,0 +1,55 @@
+{
+  "retrieved_local_date": "2026-10-10 Australia/Sydney",
+  "sources": [
+    {
+      "id": "NSW_ROADS",
+      "url": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Transport_Theme/FeatureServer/5",
+      "query": "roadnamebase IN ('MOUNTAIN STRAIGHT','CONROD STRAIGHT','BROCKS SKYLINE','PIT STRAIGHT')",
+      "returned_crs": 4326,
+      "features": 27,
+      "attribution": "NSW Spatial Services",
+      "use": "horizontal road centreline",
+      "licence_reference": "https://www.data.nsw.gov.au/data/dataset/nsw-foundation-spatial-data-framework-transport-road-segment"
+    },
+    {
+      "id": "NSW_DEM",
+      "url": "https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_5M_Elevation/ImageServer",
+      "operation": "exportImage",
+      "bbox_wgs84": [
+        149.535,
+        -33.461,
+        149.566,
+        -33.437
+      ],
+      "export_crs": 3857,
+      "export_size": [
+        691,
+        641
+      ],
+      "interpolation": "bilinear",
+      "service_post_spacing_m": 5,
+      "attribution": "NSW Spatial Services; service copyright DFSI 2019",
+      "use": "elevation profile and scenery terrain"
+    },
+    {
+      "id": "COUNCIL_FACTS",
+      "url": "https://www.bathurst.nsw.gov.au/Services/Facilities/Mount-Panorama/About-the-Mount/Track-Facts",
+      "use": "6213m,23 turns,862m highest,174m relief,1in6.13 steepest grade, named straight figures"
+    },
+    {
+      "id": "COUNCIL_AREAS",
+      "url": "https://www.bathurst.nsw.gov.au/Services/Facilities/Mount-Panorama/About-the-Mount/The-Circuit",
+      "use": "named area ordering, landscape descriptions"
+    },
+    {
+      "id": "SC2024",
+      "url": "https://assets.ctfassets.net/xd502h20t7lh/y5OOOnBAu9a0rhfbpFFDi/814ef60c675474b00ecf467e0cf21e29/BATHURST24_TrackMap.pdf",
+      "use": "landmark side and precinct association only; schematic says not to scale"
+    },
+    {
+      "id": "SC2026",
+      "url": "https://www.supercars.com/circuit/mount-panorama-motor-racing-circuit",
+      "use": "qualitative topology cross-check using organiser image"
+    }
+  ]
+}

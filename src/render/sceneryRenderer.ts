@@ -1,0 +1,171 @@
+import { Camera, ProjectedPoint } from './camera';
+import { SpriteGenerator } from './spriteGenerator';
+import { SceneryItem } from '../types/track';
+import { TrackManager } from '../track/trackManager';
+import { RenderedSegment } from './roadRenderer';
+
+export interface DrawableObject {
+  type: 'scenery' | 'car';
+  depthZ: number;
+  screenX: number;
+  screenY: number; // Base position (bottom center)
+  width: number;
+  height: number;
+  canvas: HTMLCanvasElement;
+  clipY: number;
+  collidable?: boolean;
+}
+
+export class SceneryRenderer {
+  public drawables: DrawableObject[] = [];
+
+  public prepareScenery(
+    track: TrackManager,
+    camera: Camera,
+    spriteGen: SpriteGenerator,
+    screenW: number,
+    screenH: number,
+    horizonY: number,
+    renderedSegments: RenderedSegment[],
+    elevationExaggeration: number = 1.0
+  ): void {
+    this.drawables.length = 0;
+
+    // Build quick lookup for segment occlusion
+    const occludedBySegId = new Map<number, boolean>();
+    const renderedSegIds = new Set<number>();
+    for (const rs of renderedSegments) {
+      occludedBySegId.set(rs.segment.id, rs.occluded);
+      renderedSegIds.add(rs.segment.id);
+    }
+
+    const visibleScenery = track.getSceneryAhead(camera.s_m, 500);
+
+    for (const item of visibleScenery) {
+      // Ignore road markings (already drawn on road surface) and placement cue markers
+      if (item.sprite_key === 'road_line' || item.sprite_key === 'crest_marker' || item.sprite_key === 'vista') {
+        continue;
+      }
+
+      // Determine height
+      const sample = track.sample(item.s_m, elevationExaggeration);
+      const segId = sample.segmentId;
+
+      // If the road segment is occluded by a hill in front of it, skip
+      if (occludedBySegId.get(segId) === true) {
+        continue;
+      }
+
+      const worldH = sample.height_m;
+      const worldE = item.game_east_m;
+      const worldN = item.game_north_m;
+
+      const proj = camera.project(worldE, worldN, worldH, screenW, screenH, horizonY);
+      if (!proj.visible || proj.depthZ <= camera.nearPlane) continue;
+
+      // Pick corresponding sprite
+      let spriteKey = item.sprite_key;
+      let sprite = spriteGen.scenerySprites[spriteKey];
+
+      if (!sprite) {
+        if (spriteKey.includes('barrier')) {
+          sprite = spriteGen.scenerySprites['barrier'];
+        } else if (spriteKey.includes('tent') || spriteKey.includes('camp')) {
+          sprite = spriteGen.scenerySprites['camp_tent'];
+        } else if (spriteKey.includes('tree') || spriteKey.includes('eucalyptus')) {
+          sprite = spriteGen.scenerySprites['eucalyptus'];
+        } else {
+          sprite = spriteGen.scenerySprites['bush'];
+        }
+      }
+      if (!sprite) continue;
+
+      // Scale sprite based on estimated world dimensions (clamp huge zones to avoid stretched images)
+      let worldW = item.width_m_estimate || (sprite.width * 0.12);
+      let worldH_est = item.height_m_estimate || (sprite.height * 0.12);
+
+      if (spriteKey === 'rock_face') {
+        worldW = Math.min(22, worldW);
+        worldH_est = Math.min(12, worldH_est);
+      } else if (spriteKey.includes('barrier')) {
+        worldW = Math.min(14, worldW);
+        worldH_est = 2.2;
+      } else if (spriteKey.includes('tree') || spriteKey.includes('eucalyptus')) {
+        worldW = Math.min(14, Math.max(6, worldW));
+        worldH_est = Math.min(24, Math.max(10, worldH_est));
+      }
+
+      // Scale to screen
+      const destW = Math.max(4, worldW * (proj.scale / (screenW * 0.5)));
+      const destH = Math.max(4, worldH_est * (proj.scale / (screenW * 0.5)));
+
+      this.drawables.push({
+        type: 'scenery',
+        depthZ: proj.depthZ,
+        screenX: proj.x,
+        screenY: proj.y,
+        width: destW,
+        height: destH,
+        canvas: sprite,
+        clipY: screenH,
+        collidable: item.collidable,
+      });
+    }
+  }
+
+  public addCarDrawable(
+    depthZ: number,
+    screenX: number,
+    screenY: number,
+    width: number,
+    height: number,
+    canvas: HTMLCanvasElement,
+    clipY: number
+  ): void {
+    this.drawables.push({
+      type: 'car',
+      depthZ,
+      screenX,
+      screenY,
+      width,
+      height,
+      canvas,
+      clipY,
+    });
+  }
+
+  public render(ctx: CanvasRenderingContext2D): void {
+    // Sort all drawables back to front (largest depthZ first)
+    this.drawables.sort((a, b) => b.depthZ - a.depthZ);
+
+    for (const obj of this.drawables) {
+      const x = Math.round(obj.screenX - obj.width * 0.5);
+      const y = Math.round(obj.screenY - obj.height);
+      const w = Math.round(obj.width);
+      let h = Math.round(obj.height);
+
+      if (w <= 0 || h <= 0) continue;
+
+      // Clip bottom if below clipY (occluded by hill)
+      const bottom = y + h;
+      if (bottom > obj.clipY + 8) {
+        h = Math.max(0, Math.round(obj.clipY + 8 - y));
+        if (h <= 0) continue;
+      }
+
+      const sw = obj.canvas.width;
+      const sh = Math.max(1, Math.min(obj.canvas.height, Math.round((h / obj.height) * obj.canvas.height)));
+      if (sw <= 0 || sh <= 0 || w <= 0 || h <= 0) continue;
+
+      try {
+        ctx.drawImage(
+          obj.canvas,
+          0, 0, sw, sh,
+          x, y, w, h
+        );
+      } catch (e) {
+        // Ignore any edge clipping anomalies
+      }
+    }
+  }
+}

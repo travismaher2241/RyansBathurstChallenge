@@ -1,0 +1,222 @@
+[
+  {
+    "path": "ACCURACY_REPORT.html",
+    "bytes": 352220,
+    "sha256": "fb91f9fbc2c51107321bafb9530f9936fa1bf8e5feaec230741f6139a4dc1fcd"
+  },
+  {
+    "path": "ACCURACY_REPORT.md",
+    "bytes": 15382,
+    "sha256": "003f17a33670c1312ffe31ceb1079ed953791daae086e6ce3f80ecc87d9a70b1"
+  },
+  {
+    "path": "README.md",
+    "bytes": 4900,
+    "sha256": "cd41c146c2f4fa01a6d2b02a0c07e57b85c87c7b05efb3ef8668f799426f0cb8"
+  },
+  {
+    "path": "arcade_adapter.mjs",
+    "bytes": 1567,
+    "sha256": "9c491842cb98b8f7f0d835926bb92607cbe1ae3873e590b883d62171c2b3829a"
+  },
+  {
+    "path": "circuit_overview.png",
+    "bytes": 249930,
+    "sha256": "fed69a34abb50107d3091d07d8d17cd0d967a84d6762a5251db25e98b46805e9"
+  },
+  {
+    "path": "data/centreline.geojson",
+    "bytes": 123107,
+    "sha256": "58fa58aace2cc48ac60791adf3ed6d04d3584d7ce015b80b1e6dc39e3318d1a4"
+  },
+  {
+    "path": "data/centreline_1m.csv",
+    "bytes": 1736023,
+    "sha256": "72411ae93165e65ef1bcef0ec2d2d6be4e970b415fbfbbb22041492c40bf2f6a"
+  },
+  {
+    "path": "data/centreline_1m.json",
+    "bytes": 4401720,
+    "sha256": "10ec89812573dbfe1b35cf3c736b1df4752dc92238d04ff8247711b18c986d2d"
+  },
+  {
+    "path": "data/corners.csv",
+    "bytes": 5071,
+    "sha256": "e8392bc2c4144d63828afaa5f17ba0bc85d19a8e21c5a131ec1ef53389e16da4"
+  },
+  {
+    "path": "data/corners.json",
+    "bytes": 16330,
+    "sha256": "1f0b72eb56164f0ac21f8bbdee8fccad7af891ba4220c3f0514cd481fcaa8ecd"
+  },
+  {
+    "path": "data/curvature_peaks.csv",
+    "bytes": 2079,
+    "sha256": "60da0235c85c47cf7cc4d5aa18d6f492bf37e2f0e0d404bfae39c14a507350d0"
+  },
+  {
+    "path": "data/elevation_extrema.csv",
+    "bytes": 665,
+    "sha256": "e98fa8f7f6a1ce20e71768c51b8acdd1d0f148f315d547d54299dfc151b3fa09"
+  },
+  {
+    "path": "data/landmarks.csv",
+    "bytes": 4357,
+    "sha256": "d174f39abe1a17ab58006c9765fa7dca973deb6fd6f6a998562f9c10f0a88cfe"
+  },
+  {
+    "path": "data/metadata.json",
+    "bytes": 2906,
+    "sha256": "b0721e2ac9f9a1a6fba85dc4ec67bea4076ffe30109f96344cdae4b4eac19e21"
+  },
+  {
+    "path": "data/scenery.csv",
+    "bytes": 153650,
+    "sha256": "522d6f5c1230627f034f178911693145b3eccb14499624817a96b0e4a2b006da"
+  },
+  {
+    "path": "data/scenery.json",
+    "bytes": 427633,
+    "sha256": "f86386a53433f2c1863dfba7c93dfa20d6effe3e31ef3136ce0097e3617b5110"
+  },
+  {
+    "path": "data/segments_5m.csv",
+    "bytes": 235075,
+    "sha256": "a7297bb2fb6b962b996a7f2e8e050e346f92228cb187a321186c8b1b7f27f859"
+  },
+  {
+    "path": "data/smoothing_sensitivity.csv",
+    "bytes": 570,
+    "sha256": "ef5f9cd952a39198be3f44da82833c44f539a0139ab0d27ada1a590d389c3bdb"
+  },
+  {
+    "path": "data/straights.csv",
+    "bytes": 1560,
+    "sha256": "17a904ef6b6076d54ebc148c2548ce6295c588f550d7f6717e70176a5146d459"
+  },
+  {
+    "path": "data/straights.json",
+    "bytes": 3142,
+    "sha256": "afd8f823fc7463c5f329d9e4987471be6d2117999d06e933eb1e52ae5606f952"
+  },
+  {
+    "path": "data/track.json",
+    "bytes": 1292843,
+    "sha256": "70627bae8a833d7a59684edfc20a37a3c751cc62e2195a53e9a0466cedbfa0a2"
+  },
+  {
+    "path": "data/validation.json",
+    "bytes": 791,
+    "sha256": "ef65cfafc122258c9130db9ea7ecebc77e1b6122c8b5bd36f9b6786eccfb1ad3"
+  },
+  {
+    "path": "geometry_metadata.json",
+    "bytes": 981,
+    "sha256": "618eebb0191f532a6be8a28fe6e1562a95822f3c5e8dcbf1b301343bce9e9131"
+  },
+  {
+    "path": "raw/BATHURST24_TrackMap.pdf",
+    "bytes": 749984,
+    "sha256": "d03f59866e9d1b0ae65dfee0f9883abf91e81f45789115bb7ee838c91c3d7526"
+  },
+  {
+    "path": "raw/SC26-Track_Maps_BATH.jpg",
+    "bytes": 34474,
+    "sha256": "d9d7e9944be218fb4ed2667e81e0d229c138cc5b1502c14a6930853429a38f3a"
+  },
+  {
+    "path": "raw/circuit_lines.json",
+    "bytes": 171,
+    "sha256": "3a138c936a8f1871563725472541cadb8421021c8b7dc706de034c250e9c16e9"
+  },
+  {
+    "path": "raw/circuit_roads.json",
+    "bytes": 33531,
+    "sha256": "ba4e7be8b6ac056dc65c0daeedab5303850705a07cc648df2cd6e34cd5eca398"
+  },
+  {
+    "path": "raw/dem_export_response.json",
+    "bytes": 362,
+    "sha256": "084839b611f7306108a53d57ad89e2790558e65e461d8ab3fa72859b5ea10f3a"
+  },
+  {
+    "path": "raw/dem_full_response.json",
+    "bytes": 277,
+    "sha256": "24acfd83727a8942889145300d764f408a73c098962e8c5edc4ec3c0b651f032"
+  },
+  {
+    "path": "raw/elevation_metadata.json",
+    "bytes": 6351,
+    "sha256": "5a0a3fc7bea29feae68212932cc484d9a7441bca4ac836b80a1a678716b2cae0"
+  },
+  {
+    "path": "raw/elevation_point.json",
+    "bytes": 225,
+    "sha256": "834f28fe7bdd5b32486b2887870ab62bf712bd7ec7b0ad44db2693f1708e0c20"
+  },
+  {
+    "path": "raw/elevation_samples_0.json",
+    "bytes": 18176,
+    "sha256": "2148d5a35f4aa5e167a4fa500aeaaa217793198b105f2e79fe6193be11bdc9de"
+  },
+  {
+    "path": "raw/elevation_samples_3.json",
+    "bytes": 18182,
+    "sha256": "ff9b8eaca996d19205430376c859a67b6b90a25b9482a07067f97253a2d47840"
+  },
+  {
+    "path": "raw/elevation_samples_4.json",
+    "bytes": 18186,
+    "sha256": "ef88b2cb5df41a5e74e7d757e92ecb054b61e1167de46719022a337330d53a67"
+  },
+  {
+    "path": "raw/elevation_samples_6.json",
+    "bytes": 4183,
+    "sha256": "47ed04fca0ece05611c4d69213e9655d6145320fdb8358a75495da1c538af1dd"
+  },
+  {
+    "path": "raw/elevation_test.json",
+    "bytes": 226,
+    "sha256": "9189f246264ad22b046c9251c7ffd26c899a396105637ef540b40d96c8ee4355"
+  },
+  {
+    "path": "raw/nsw_dem_full.tiff",
+    "bytes": 2360772,
+    "sha256": "f686a26f39ae21defad4e10698035e8d7f3326519231f9db845e512d3ba73a57"
+  },
+  {
+    "path": "raw/road_metadata.json",
+    "bytes": 35066,
+    "sha256": "41483121e850e39c327a4ace828eef5c8a27f261c1c64d342dd31bcf193d7950"
+  },
+  {
+    "path": "raw/roads.json",
+    "bytes": 1102067,
+    "sha256": "8ca59e7c450c31bed08c97495cebe8a62d54fd1bd0137765310ee2608958e9e5"
+  },
+  {
+    "path": "scripts/build_geometry.py",
+    "bytes": 3565,
+    "sha256": "ced2c08c68f5a88fbed172432b213d467762d171fe0cd5926eee588fd8f5d499"
+  },
+  {
+    "path": "scripts/dem_full.py",
+    "bytes": 704,
+    "sha256": "1607666f485e16b8a0970896894675f7c0787e6112c109c314bcc4fc2330d887"
+  },
+  {
+    "path": "scripts/make_package.py",
+    "bytes": 15355,
+    "sha256": "4929ceb7f697ce399f72679a0cd6f812dda152ba6c282aefb58a399c0acceb1f"
+  },
+  {
+    "path": "scripts/retrieve_full.py",
+    "bytes": 691,
+    "sha256": "1c3a28356e52f7d8cc42eeb29ab7c3d6ebaa79be09bc9b89a2e8c6859e1942be"
+  },
+  {
+    "path": "sources.json",
+    "bytes": 2065,
+    "sha256": "cac89be020fe99f4293e70a34c1ad574c1958899a6d35b8aa10a6029796ca3a4"
+  }
+]

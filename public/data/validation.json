@@ -1,0 +1,24 @@
+{
+  "segment_count": 1243,
+  "point_count": 6214,
+  "segment_length_sum_m": 6213,
+  "last_segment_length_m": 3,
+  "mapped_closure_error_m": 0.0,
+  "height_closure_error_m": 0.0,
+  "total_heading_change_deg": -360.0,
+  "curvature_integral_deg": -359.987571,
+  "dem_missing_samples": 0,
+  "max_gradient_percent": 13.837584,
+  "min_gradient_percent": -17.644108,
+  "min_radius_m": 17.526,
+  "all_game_values_finite": true,
+  "source_feature_planimetricaccuracy_values": [
+    10
+  ],
+  "smoothing_displacement_to_raw_polyline_max_m": 4.270986051402524,
+  "smoothing_displacement_to_raw_polyline_p95_m": 1.298325778406093,
+  "strict_json_and_csv_validated": true,
+  "segment_endpoints_continuous": true,
+  "segment_turn_sum_deg": -360.0000000699246,
+  "scenery_placement_range_validated": true
+}

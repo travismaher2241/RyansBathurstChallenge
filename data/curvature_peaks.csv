@@ -1,0 +1,26 @@
+id,s_m,area,direction,analysis_radius_m,quality
+P01,242,Hell Corner,left,23.079,derived_estimate_not_official_turn_number
+P02,1375,Griffin’s Bend,right,60.275,derived_estimate_not_official_turn_number
+P03,1761,The Cutting,left,82.87,derived_estimate_not_official_turn_number
+P04,1873,The Cutting,left,30.717,derived_estimate_not_official_turn_number
+P05,2016,Reid Park,right,76.28,derived_estimate_not_official_turn_number
+P06,2192,Reid Park,right,80.649,derived_estimate_not_official_turn_number
+P07,2300,Reid Park,left,110.023,derived_estimate_not_official_turn_number
+P08,2382,Sulman Park,left,378.015,derived_estimate_not_official_turn_number
+P09,2445,Sulman Park,left,135.138,derived_estimate_not_official_turn_number
+P10,2591,Sulman Park,left,111.508,derived_estimate_not_official_turn_number
+P11,2845,McPhillamy Park,left,97.055,derived_estimate_not_official_turn_number
+P12,2914,McPhillamy Park,left,101.521,derived_estimate_not_official_turn_number
+P13,3185,Brock’s Skyline,right,90.031,derived_estimate_not_official_turn_number
+P14,3256,The Esses / Dipper,left,66.039,derived_estimate_not_official_turn_number
+P15,3322,The Esses / Dipper,right,50.249,derived_estimate_not_official_turn_number
+P16,3395,The Esses / Dipper,left,33.897,derived_estimate_not_official_turn_number
+P17,3444,The Esses / Dipper,right,58.118,derived_estimate_not_official_turn_number
+P18,3556,Forrest’s Elbow approach and exit,left,103.582,derived_estimate_not_official_turn_number
+P19,3634,Forrest’s Elbow approach and exit,right,73.004,derived_estimate_not_official_turn_number
+P20,3759,Forrest’s Elbow approach and exit,left,31.803,derived_estimate_not_official_turn_number
+P21,3984,Conrod Straight,left,132.234,derived_estimate_not_official_turn_number
+P22,5108,The Chase,right,161.587,derived_estimate_not_official_turn_number
+P23,5388,The Chase,left,37.79,derived_estimate_not_official_turn_number
+P24,5495,The Chase,right,80.915,derived_estimate_not_official_turn_number
+P25,5956,Murray’s Corner,left,27.742,derived_estimate_not_official_turn_number

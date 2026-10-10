@@ -1,0 +1,336 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0b0e14;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  touch-action: none;
+}
+
+#game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: #000;
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+/* Touch Controls */
+#touch-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 24px) env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 24px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #touch-controls {
+    display: none !important;
+  }
+}
+
+#touch-controls.hidden {
+  display: none !important;
+}
+
+#touch-left-zone, #touch-right-zone {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  pointer-events: auto;
+  margin-bottom: 16px;
+}
+
+.touch-btn {
+  width: 76px;
+  height: 76px;
+  background: rgba(18, 24, 38, 0.75);
+  border: 3px solid #ffcc00;
+  border-radius: 12px;
+  color: #ffcc00;
+  font-size: 24px;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.05s, background 0.05s;
+}
+
+.touch-btn:active, .touch-btn.active {
+  background: rgba(255, 204, 0, 0.4);
+  transform: scale(0.92);
+  border-color: #fff;
+  color: #fff;
+}
+
+.pedal-btn {
+  width: 86px;
+  height: 86px;
+  font-size: 14px;
+}
+
+#touch-gas {
+  background: rgba(20, 100, 30, 0.8);
+  border-color: #33ff66;
+  color: #33ff66;
+}
+#touch-gas:active, #touch-gas.active {
+  background: rgba(51, 255, 102, 0.5);
+  color: #fff;
+}
+
+#touch-brake {
+  background: rgba(120, 20, 20, 0.8);
+  border-color: #ff3344;
+  color: #ff3344;
+}
+#touch-brake:active, #touch-brake.active {
+  background: rgba(255, 51, 68, 0.5);
+  color: #fff;
+}
+
+.touch-action-btn {
+  position: absolute;
+  top: env(safe-area-inset-top, 16px);
+  pointer-events: auto;
+  background: rgba(10, 15, 25, 0.7);
+  border: 2px solid #aaa;
+  color: #fff;
+  font-size: 11px;
+  font-family: inherit;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#touch-pause {
+  right: env(safe-area-inset-right, 24px);
+}
+
+#touch-reset {
+  right: calc(env(safe-area-inset-right, 24px) + 90px);
+}
+
+/* UI Overlay & Modals */
+#ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-screen {
+  pointer-events: auto;
+  background: rgba(10, 14, 23, 0.94);
+  border: 4px solid #ffb703;
+  box-shadow: 0 0 35px rgba(255, 183, 3, 0.45), inset 0 0 20px rgba(0, 0, 0, 0.8);
+  border-radius: 14px;
+  padding: 32px 40px;
+  max-width: 680px;
+  width: 90%;
+  text-align: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.menu-title {
+  color: #ffb703;
+  font-size: 28px;
+  margin-bottom: 8px;
+  text-shadow: 3px 3px 0 #000, 0 0 12px #ff8800;
+  letter-spacing: 2px;
+}
+
+.menu-subtitle {
+  color: #8ecae6;
+  font-size: 12px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.menu-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.menu-btn {
+  background: linear-gradient(180deg, #1d3557 0%, #0d1b2a 100%);
+  border: 2px solid #457b9d;
+  color: #fff;
+  padding: 14px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+}
+
+.menu-btn:hover, .menu-btn:focus {
+  background: linear-gradient(180deg, #e63946 0%, #b5179e 100%);
+  border-color: #ffb703;
+  color: #ffb703;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 183, 3, 0.4);
+}
+
+.menu-btn.primary {
+  border-color: #ffb703;
+  color: #ffb703;
+  font-size: 16px;
+}
+
+.menu-settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+  font-size: 12px;
+  color: #eee;
+}
+
+.menu-select, .menu-checkbox {
+  font-family: inherit;
+  background: #1d3557;
+  color: #ffb703;
+  border: 1px solid #457b9d;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* Results Screen */
+.results-table {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.results-table th, .results-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #334155;
+  text-align: left;
+}
+.results-table th {
+  color: #ffb703;
+}
+.results-table tr.player-row {
+  background: rgba(255, 183, 3, 0.2);
+  color: #ffb703;
+  font-weight: bold;
+}
+
+/* Rotate Device Overlay */
+#rotate-device-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+#rotate-device-overlay.hidden {
+  display: none !important;
+}
+.rotate-content .rotate-icon {
+  font-size: 54px;
+  margin-bottom: 20px;
+  animation: rotatePulse 2s infinite ease-in-out;
+}
+@keyframes rotatePulse {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+}
+.rotate-content h2 {
+  color: #ffb703;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.rotate-content p {
+  color: #aaa;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* Developer Debug Panel */
+#debug-panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(10, 15, 25, 0.88);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  font-family: monospace;
+  font-size: 11px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  z-index: 200;
+  pointer-events: auto;
+  max-width: 380px;
+  line-height: 1.45;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.7);
+}
+#debug-panel.hidden {
+  display: none;
+}
+#debug-panel select, #debug-panel button {
+  background: #0f172a;
+  color: #38bdf8;
+  border: 1px solid #38bdf8;
+  font-size: 10px;
+  font-family: inherit;
+  padding: 3px 6px;
+  margin-top: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
