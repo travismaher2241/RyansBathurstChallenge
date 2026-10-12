@@ -2,7 +2,6 @@ import { GameMode, GameSettings } from '../types/track';
 import { VehiclePhysics } from '../physics/vehiclePhysics';
 import { AIManager, OpponentCar } from '../ai/aiManager';
 import { SoundEngine } from '../audio/soundEngine';
-import { saveBestLapTime, loadBestLapTime } from '../config/gameConfig';
 import { formatLapTime } from '../utils/math';
 
 export interface DriverStanding {
@@ -49,10 +48,13 @@ export class RaceManager {
     this.countdownTimer = 3.9;
     this.countdownPhase = 3;
     this.raceElapsedTime = 0;
+    this.playerFinalTime = 0;
+    this.playerFinalPosition = 1;
     this.showFinalLapNotice = false;
     this.finalLapNoticeTimer = 0;
     this.hasAnnouncedFinalLap = false;
     this.winnerTime = null;
+    this.standings = [];
 
     if (mode === 'arcade') {
       this.totalLaps = 3;
@@ -76,10 +78,13 @@ export class RaceManager {
   public exitToTitle(sound: SoundEngine): void {
     this.state = 'menu';
     this.raceElapsedTime = 0;
+    this.playerFinalTime = 0;
+    this.playerFinalPosition = 1;
     this.countdownTimer = 0;
     this.showFinalLapNotice = false;
     this.hasAnnouncedFinalLap = false;
     this.winnerTime = null;
+    this.standings = [];
     sound.stopAll();
   }
 
@@ -119,12 +124,7 @@ export class RaceManager {
 
     // Check race finish for Arcade mode (player finishes after 3 full laps)
     if (this.mode === 'arcade' && player.currentLap > this.totalLaps && this.state === 'racing') {
-      this.finishRace(player, sound, settings);
-    }
-
-    // In Time Trial mode: save best time on valid complete laps
-    if (this.mode === 'timetrial' && player.lastLapTime && player.lapValid) {
-      saveBestLapTime(player.lastLapTime, settings.difficulty);
+      this.finishRace(player, ai, sound, settings);
     }
   }
 
@@ -231,14 +231,12 @@ export class RaceManager {
     return p ? p.position : 1;
   }
 
-  private finishRace(player: VehiclePhysics, sound: SoundEngine, settings: GameSettings): void {
+  private finishRace(player: VehiclePhysics, ai: AIManager, sound: SoundEngine, _settings: GameSettings): void {
     this.state = 'finished';
-    this.playerFinalPosition = this.getPlayerPosition();
     this.playerFinalTime = this.raceElapsedTime;
+    player.freeze();
+    this.updateStandings(player, ai);
+    this.playerFinalPosition = this.getPlayerPosition();
     sound.playFinish();
-
-    if (player.bestLapTime && player.lapValid) {
-      saveBestLapTime(player.bestLapTime, settings.difficulty);
-    }
   }
 }

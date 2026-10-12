@@ -155,7 +155,11 @@ export class BathurstArcadeGame {
       () => this.restartCurrentRace(),
       () => this.exitToTitle(),
       (newSettings) => {
+        const oldDiff = this.settings.difficulty;
         this.settings = newSettings;
+        if (newSettings.difficulty !== oldDiff) {
+          this.player.invalidateCurrentLap();
+        }
         this.sound.setMute(!newSettings.soundEnabled);
         this.updateTouchShiftButtons();
       },
@@ -210,6 +214,19 @@ export class BathurstArcadeGame {
     this.menus.showTitleScreen(this.settings);
   }
 
+  private pauseGame(): void {
+    if (this.isPaused) return;
+    this.isPaused = true;
+    this.menus.showPauseMenu(this.settings, this.race.mode);
+  }
+
+  private resumeGame(): void {
+    if (!this.isPaused) return;
+    this.isPaused = false;
+    this.menus.hide();
+    this.sound.resume();
+  }
+
   private updateTouchShiftButtons(): void {
     const shiftZone = document.getElementById('touch-shift-zone');
     if (shiftZone) {
@@ -235,21 +252,22 @@ export class BathurstArcadeGame {
       frameTime = 0.25;
     }
 
-    // Handle Pause toggles
-    if (this.inputs.pauseRequested) {
+    // Handle Auto-Pause (blur, portrait rotation) -> explicitly pause, NEVER toggle/resume
+    if (this.inputs.autoPauseRequested) {
+      this.inputs.autoPauseRequested = false;
+      if (!this.isPaused && (this.race.state === 'racing' || this.race.state === 'countdown')) {
+        this.pauseGame();
+      }
+    }
+
+    // Handle User-Requested Pause Toggle (ESC, P key, Gamepad Start, touch pause button)
+    if (this.inputs.userPauseToggleRequested || this.inputs.pauseRequested) {
+      this.inputs.userPauseToggleRequested = false;
       this.inputs.pauseRequested = false;
-      if (this.race.state === 'racing' || this.race.state === 'countdown') {
-        this.isPaused = !this.isPaused;
-        if (this.isPaused) {
-          this.menus.showPauseMenu(this.settings, this.race.mode);
-        } else {
-          this.menus.hide();
-          this.sound.resume();
-        }
-      } else if (this.isPaused) {
-        this.isPaused = false;
-        this.menus.hide();
-        this.sound.resume();
+      if (this.isPaused) {
+        this.resumeGame();
+      } else if (this.race.state === 'racing' || this.race.state === 'countdown') {
+        this.pauseGame();
       }
     }
 
@@ -272,6 +290,15 @@ export class BathurstArcadeGame {
   }
 
   private fixedUpdate(dt: number): void {
+    // If the race is finished, freeze vehicle position and ensure finish overlay is visible
+    if (this.race.state === 'finished') {
+      this.player.freeze();
+      if (document.getElementById('ui-overlay')!.innerHTML === '') {
+        this.menus.showFinishScreen(this.race, this.player, this.settings);
+      }
+      return;
+    }
+
     const rawInputs = this.inputs.getInputs();
 
     // Prevent acceleration and freeze movement during countdown
@@ -282,22 +309,28 @@ export class BathurstArcadeGame {
     // Update Player Vehicle Dynamics
     this.player.update(dt, drivingInputs, this.track, this.settings);
 
-    // Update AI Opponents
-    this.ai.update(
-      dt,
-      this.track,
-      this.player,
-      this.settings,
-      this.race.state === 'racing',
-      this.race.raceElapsedTime,
-      this.race.totalLaps
-    );
+    // Update AI Opponents ONLY in Arcade Mode!
+    // In Time Trial and Practice, AI simulation and collisions MUST NOT run.
+    if (this.race.mode === 'arcade') {
+      this.ai.update(
+        dt,
+        this.track,
+        this.player,
+        this.settings,
+        this.race.state === 'racing',
+        this.race.raceElapsedTime,
+        this.race.totalLaps
+      );
+    }
 
     // Update Race Flow (Laps, Standings, Countdown, Checkered flag)
     this.race.update(dt, this.player, this.ai, this.sound, this.settings);
 
-    if (this.race.state === 'finished' && document.getElementById('ui-overlay')!.innerHTML === '') {
-      this.menus.showFinishScreen(this.race, this.player, this.settings);
+    if ((this.race.state as string) === 'finished') {
+      this.player.freeze();
+      if (document.getElementById('ui-overlay')!.innerHTML === '') {
+        this.menus.showFinishScreen(this.race, this.player, this.settings);
+      }
     }
 
     // Update Telemetry & Sound Engine

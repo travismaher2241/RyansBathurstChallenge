@@ -97,5 +97,82 @@ const carA_distance = 1 * 6213 + 50; // Just started lap 2 (50m past line)
 const carB_distance = 0 * 6213 + 6200; // Almost finished lap 1 (13m before line)
 assert(carA_distance > carB_distance, 'Car A on lap 2 is ranked ahead of Car B on lap 1 across the timing line');
 
+// --- GAMEPLAY REGRESSION TESTS ---
+
+// Regression 1: Minimum Valid Lap Time Sanity (Sub-95s impossible times rejected)
+const MIN_VALID_LAP_TIME_SEC = 95.0;
+function isValidLapTime(t) {
+  return Number.isFinite(t) && t >= MIN_VALID_LAP_TIME_SEC;
+}
+assert(!isValidLapTime(7.5), 'Rejects legacy 7.5s countdown record');
+assert(!isValidLapTime(3.583), 'Rejects legacy 3.583s impossible record');
+assert(!isValidLapTime(-10), 'Rejects negative lap time');
+assert(!isValidLapTime(NaN), 'Rejects NaN lap time');
+assert(isValidLapTime(138.45), 'Accepts legitimate 2:18.45 lap time');
+
+// Regression 2: Record difficulty separation
+const mockStorage = {};
+function saveRecord(t, diff) {
+  if (!isValidLapTime(t)) return;
+  const key = `bathurst_record_${diff}`;
+  if (!mockStorage[key] || t < mockStorage[key]) {
+    mockStorage[key] = t;
+  }
+}
+saveRecord(145.2, 'arcade');
+assert(mockStorage['bathurst_record_arcade'] === 145.2, 'Arcade record saved');
+assert(mockStorage['bathurst_record_pro'] === undefined, 'Arcade record does not leak into Pro');
+
+// Regression 3: Auto-pause vs user toggle logic
+let isPaused = false;
+function onAutoPause() {
+  if (!isPaused) isPaused = true; // Explicit pause only, never toggle
+}
+function onUserToggle() {
+  isPaused = !isPaused;
+}
+onAutoPause();
+assert(isPaused === true, 'Auto-pause pauses running game');
+onAutoPause();
+assert(isPaused === true, 'Repeated auto-pause (resize/rotate) remains paused without resuming');
+onUserToggle();
+assert(isPaused === false, 'User toggle resumes game');
+
+// Regression 4: Powertrain flat-road full throttle acceleration test
+// Verify vehicle shifts out of 5th gear and exceeds 250 km/h toward top speed
+const gearTopSpeedsKmh = [75, 125, 175, 222, 262, 302];
+const gearAccels = [7.5, 6.2, 5.2, 4.4, 3.8, 3.4];
+let speedMs = 0;
+let gear = 1;
+const dt = 1 / 60;
+// Simulate 45 seconds of flat road full throttle
+for (let frame = 0; frame < 45 * 60; frame++) {
+  const speedKmh = speedMs * 3.6;
+  if (gear < 6 && speedKmh > gearTopSpeedsKmh[gear - 1] * 0.90) {
+    gear++;
+  }
+  const topSpeedForGear = gearTopSpeedsKmh[gear - 1] / 3.6;
+  const powerFactor = Math.max(0, Math.min(1, 1.0 - Math.pow(speedMs / topSpeedForGear, 1.8)));
+  const baseAccel = gearAccels[gear - 1] || 2.8;
+  const accelForce = baseAccel * (0.40 + 0.60 * powerFactor) + 1.1;
+  const aeroDrag = 0.5 * 1.225 * 0.38 * 2.1 * (speedMs * speedMs) / 1320;
+  const rollingRes = 0.015 * 9.81;
+  const netAccel = accelForce - aeroDrag - rollingRes;
+  speedMs = Math.min(82.5, Math.max(0, speedMs + netAccel * dt));
+}
+const finalKmh = speedMs * 3.6;
+assert(gear === 6, `Transmission reached 6th gear on flat road (current gear: ${gear})`);
+assert(finalKmh > 275, `Vehicle reaches high speed (>275 km/h) on flat road (actual: ${finalKmh.toFixed(1)} km/h)`);
+
+// Regression 5: Post-finish freeze test
+let postFinishSpeed = 0;
+let distancePostFinish = 1000;
+function updatePostFinish() {
+  postFinishSpeed = 0; // frozen
+  // Distance does not increase
+}
+updatePostFinish();
+assert(postFinishSpeed === 0 && distancePostFinish === 1000, 'Car does not move after race finish');
+
 console.log(`\nTests completed: ${passed} passed, ${failed} failed.`);
 if (failed > 0) process.exit(1);

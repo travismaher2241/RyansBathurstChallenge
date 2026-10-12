@@ -1,4 +1,4 @@
-import { PHYSICS_CONFIG, TRACK_LAP_LENGTH_M } from '../config/gameConfig';
+import { PHYSICS_CONFIG, TRACK_LAP_LENGTH_M, MIN_VALID_LAP_TIME_SEC, saveBestLapTime } from '../config/gameConfig';
 import { TrackManager, SampledPoint } from '../track/trackManager';
 import { wrap, clamp, lerp } from '../utils/math';
 import { GameSettings } from '../types/track';
@@ -27,7 +27,6 @@ export class VehiclePhysics {
   public slipAngle: number = 0;
 
   // State flags
-  // State flags
   public isBraking: boolean = false;
   public isSkidding: boolean = false;
   public isOffRoad: boolean = false;
@@ -45,6 +44,7 @@ export class VehiclePhysics {
   public bestLapTime: number | null = null;
   public lapStarted: boolean = false;
   public lapValid: boolean = true;
+  public lapDifficulty: 'arcade' | 'pro' = 'arcade';
 
   // Transmission cooldown
   private shiftCooldownTimer: number = 0;
@@ -74,14 +74,20 @@ export class VehiclePhysics {
     this.bestLapTime = null;
     this.lapStarted = autoStartLap;
     this.lapValid = true;
+    this.lapDifficulty = 'arcade';
     this.shiftCooldownTimer = 0;
     this.smoothedCurvature = 0;
+  }
+
+  public invalidateCurrentLap(): void {
+    this.lapValid = false;
+    this.lastLapTime = null;
+    this.bestLapTime = null;
   }
 
   public freeze(): void {
     this.speedMs = 0;
     this.rpm = PHYSICS_CONFIG.idleRpm;
-    this.currentLapTime = 0;
     this.isBraking = false;
     this.isSkidding = false;
     this.isWallHit = false;
@@ -155,10 +161,10 @@ export class VehiclePhysics {
     if (throttle > 0 && !isBraking) {
       const topSpeedForGear = PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] / 3.6;
       const powerFactor = clamp(1.0 - Math.pow(this.speedMs / topSpeedForGear, 1.8), 0, 1);
-      // Realistic touring car power delivery across 6 gear ratios
-      const gearAccels = [5.8, 4.6, 3.7, 3.0, 2.5, 2.15];
-      const baseAccel = gearAccels[this.gear - 1] || 2.0;
-      accelForce = throttle * (baseAccel * (0.25 + 0.75 * powerFactor) + 0.55);
+      // Realistic touring car power delivery across 6 gear ratios (580hp V8 / Turbo)
+      const gearAccels = [7.5, 6.2, 5.2, 4.4, 3.8, 3.4];
+      const baseAccel = gearAccels[this.gear - 1] || 2.8;
+      accelForce = throttle * (baseAccel * (0.40 + 0.60 * powerFactor) + 1.1);
     }
 
     // Aerodynamic and rolling resistance
@@ -250,7 +256,7 @@ export class VehiclePhysics {
 
     // Lap counting & timing across the timing line (s = 0)
     if (prevS > 6000 && this.s_m < 200) {
-      this.handleLapCompleted();
+      this.handleLapCompleted(settings.difficulty);
     }
 
     // Only count lap time when lap is officially started (after crossing start line)
@@ -259,26 +265,30 @@ export class VehiclePhysics {
     }
   }
 
-  private handleLapCompleted(): void {
+  private handleLapCompleted(difficulty: 'arcade' | 'pro'): void {
     if (!this.lapStarted) {
       // First crossing from the starting grid: Start Lap 1 officially!
       this.lapStarted = true;
       this.currentLap = 1;
       this.currentLapTime = 0;
       this.lapValid = true;
+      this.lapDifficulty = difficulty;
       return;
     }
 
     // Completed a full valid 6,213 m lap!
     this.lastLapTime = this.currentLapTime;
-    if (this.lapValid) {
+    if (this.lapValid && this.currentLapTime >= MIN_VALID_LAP_TIME_SEC) {
       if (this.bestLapTime === null || this.currentLapTime < this.bestLapTime) {
         this.bestLapTime = this.currentLapTime;
       }
+      // Save record immediately with the difficulty under which this specific lap was driven!
+      saveBestLapTime(this.currentLapTime, this.lapDifficulty);
     }
     this.currentLap++;
     this.currentLapTime = 0;
     this.lapValid = true;
+    this.lapDifficulty = difficulty;
   }
 
   private updateTransmission(dt: number, inputs: CarInputs, settings: GameSettings): void {
@@ -289,11 +299,11 @@ export class VehiclePhysics {
     }
 
     if (settings.transmission === 'auto') {
-      // Automatic Gearbox: shift up at 91% of current gear top speed, shift down at 74%
-      if (this.gear < 6 && speedKmh > PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] * 0.91) {
+      // Automatic Gearbox: shift up at 90% of current gear top speed, shift down at 72%
+      if (this.gear < 6 && speedKmh > PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] * 0.90) {
         this.gear++;
         this.shiftCooldownTimer = 0.22;
-      } else if (this.gear > 1 && speedKmh < PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 2] * 0.74) {
+      } else if (this.gear > 1 && speedKmh < PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 2] * 0.72) {
         this.gear--;
         this.shiftCooldownTimer = 0.22;
       }

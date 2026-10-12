@@ -39,13 +39,32 @@ export function saveStoredSettings(settings: GameSettings): void {
   }
 }
 
+export const MIN_VALID_LAP_TIME_SEC = 95.0; // Sub-1:35 is physically impossible on a 6,213m lap
+
 export function loadBestLapTime(difficulty: 'arcade' | 'pro' = 'arcade'): number | null {
   try {
     const key = difficulty === 'pro' ? STORAGE_KEY_BEST_TIME_PRO : STORAGE_KEY_BEST_TIME_ARCADE;
     const raw = localStorage.getItem(key);
-    if (raw) return parseFloat(raw);
-    const legacy = localStorage.getItem('bathurst_arcade_best_time_v1');
-    if (legacy && difficulty === 'arcade') return parseFloat(legacy);
+    if (raw) {
+      const val = parseFloat(raw);
+      if (Number.isFinite(val) && val >= MIN_VALID_LAP_TIME_SEC) {
+        return val;
+      } else {
+        // Purge legacy corrupted impossible times (< 95s)
+        localStorage.removeItem(key);
+      }
+    }
+    // Also check and clean legacy key
+    const legacyKey = 'bathurst_arcade_best_time_v1';
+    const legacy = localStorage.getItem(legacyKey);
+    if (legacy) {
+      const val = parseFloat(legacy);
+      if (Number.isFinite(val) && val >= MIN_VALID_LAP_TIME_SEC && difficulty === 'arcade') {
+        return val;
+      } else {
+        localStorage.removeItem(legacyKey);
+      }
+    }
   } catch (e) {
     console.warn('Could not read best lap time', e);
   }
@@ -53,6 +72,10 @@ export function loadBestLapTime(difficulty: 'arcade' | 'pro' = 'arcade'): number
 }
 
 export function saveBestLapTime(timeSec: number, difficulty: 'arcade' | 'pro' = 'arcade'): void {
+  // Reject impossible lap times and invalid numbers
+  if (!Number.isFinite(timeSec) || timeSec < MIN_VALID_LAP_TIME_SEC) {
+    return;
+  }
   try {
     const current = loadBestLapTime(difficulty);
     if (current === null || timeSec < current) {

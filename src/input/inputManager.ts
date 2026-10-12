@@ -3,6 +3,8 @@ import { CarInputs } from '../physics/vehiclePhysics';
 export class InputManager {
   private keysDown: Set<string> = new Set();
   public pauseRequested: boolean = false;
+  public userPauseToggleRequested: boolean = false;
+  public autoPauseRequested: boolean = false;
   public restartRequested: boolean = false;
   public resetRequested: boolean = false;
   public debugToggleRequested: boolean = false;
@@ -69,6 +71,7 @@ export class InputManager {
       this.keysDown.add(e.key.toLowerCase());
 
       if (e.code === 'KeyP' || e.code === 'Escape') {
+        this.userPauseToggleRequested = true;
         this.pauseRequested = true;
       }
       if (e.code === 'KeyR') {
@@ -95,7 +98,7 @@ export class InputManager {
       this.touchBrake = false;
       this.touchShiftUp = false;
       this.touchShiftDown = false;
-      this.pauseRequested = true;
+      this.autoPauseRequested = true;
     });
 
     // Check orientation on mobile
@@ -110,7 +113,7 @@ export class InputManager {
     const isPortrait = window.innerHeight > window.innerWidth && window.innerWidth < 800;
     if (isPortrait) {
       rotateOverlay.classList.remove('hidden');
-      this.pauseRequested = true; // Auto-pause when rotated to portrait
+      this.autoPauseRequested = true; // Auto-pause explicitly when rotated to portrait (NEVER toggle/resume)
     } else {
       rotateOverlay.classList.remove('hidden');
       rotateOverlay.classList.add('hidden');
@@ -156,6 +159,7 @@ export class InputManager {
     if (btnPause) {
       btnPause.addEventListener('pointerdown', (e) => {
         e.preventDefault();
+        this.userPauseToggleRequested = true;
         this.pauseRequested = true;
       });
     }
@@ -198,7 +202,8 @@ export class InputManager {
     const gamepad = this.pollGamepad();
     if (gamepad) {
       if (gamepad.pause && !this.prevGamepadPause) {
-        this.pauseRequested = true; // Leading edge pause toggle
+        this.userPauseToggleRequested = true; // Leading edge pause toggle
+        this.pauseRequested = true;
       }
       this.prevGamepadPause = gamepad.pause;
     } else {

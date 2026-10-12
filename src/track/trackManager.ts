@@ -36,7 +36,56 @@ export class TrackManager {
       console.warn(`Lap length mismatch: expected ${TRACK_LAP_LENGTH_M}, got ${this.lapLength}`);
     }
     this.segments = trackData.segments;
-    this.scenery = trackData.scenery || [];
+    this.scenery = [...(trackData.scenery || [])];
+    this.injectBrakingMarkers();
+  }
+
+  private injectBrakingMarkers(): void {
+    const brakeBoards: { s_m: number; distLabel: '300' | '200' | '100'; side: 'left' | 'right' }[] = [
+      // Hell Corner (end of Pit Straight)
+      { s_m: 103, distLabel: '100', side: 'right' },
+
+      // Griffin's Bend (end of Mountain Straight)
+      { s_m: 1004, distLabel: '300', side: 'left' },
+      { s_m: 1104, distLabel: '200', side: 'left' },
+      { s_m: 1204, distLabel: '100', side: 'left' },
+
+      // The Cutting
+      { s_m: 1613, distLabel: '100', side: 'right' },
+
+      // Forrest's Elbow
+      { s_m: 3601, distLabel: '100', side: 'right' },
+
+      // The Chase (end of Conrod Straight - ~295 km/h)
+      { s_m: 4779, distLabel: '300', side: 'right' },
+      { s_m: 4879, distLabel: '200', side: 'right' },
+      { s_m: 4979, distLabel: '100', side: 'right' },
+
+      // Murray's Corner
+      { s_m: 5708, distLabel: '200', side: 'right' },
+      { s_m: 5808, distLabel: '100', side: 'right' },
+    ];
+
+    for (const b of brakeBoards) {
+      const sample = this.sample(b.s_m);
+      const roadW = sample.roadWidth_m;
+      const offset = (b.side === 'right') ? (roadW * 0.5 + 2.4) : -(roadW * 0.5 + 2.4);
+      const east = sample.east_m + sample.normalE * offset;
+      const north = sample.north_m + sample.normalN * offset;
+
+      this.scenery.push({
+        id: `brake_board_${b.s_m}_${b.distLabel}`,
+        name: `${b.distLabel}m Braking Marker`,
+        sprite_key: `brake_board_${b.distLabel}`,
+        s_m: b.s_m,
+        offset_right_m: offset,
+        game_east_m: east,
+        game_north_m: north,
+        width_m_estimate: 2.2,
+        height_m_estimate: 2.2,
+        collidable: false,
+      });
+    }
   }
 
   public getSegmentIndex(s_m: number): number {

@@ -47,7 +47,7 @@ export class AIManager {
     for (let i = 0; i < AI_CONFIG.carCount; i++) {
       const s = wrap(6100 + i * 14, TRACK_LAP_LENGTH_M);
       const lateral = (i % 2 === 0) ? -2.2 : 2.2;
-      const pace = 0.94 + (i * 0.015); // Leader slightly faster
+      const pace = 0.86 + (i * 0.012); // P7 starts at 0.86, P1 leader at ~0.932
 
       this.opponents.push({
         id: i + 1,
@@ -100,7 +100,7 @@ export class AIManager {
 
         if (absCurv > 0.003) {
           // Corner ahead! Safe entry speed: v = sqrt(a_grip / abs(curvature))
-          const grip = (settings.difficulty === 'arcade' ? 14.5 : 12.8) * ai.paceFactor;
+          const grip = (settings.difficulty === 'arcade' ? 12.2 : 13.5) * ai.paceFactor;
           const cornerSafeV = Math.sqrt(grip / absCurv);
           // Account for braking distance needed
           const distToCheck = step * lookStepM;
@@ -120,7 +120,7 @@ export class AIManager {
       } else {
         ai.isBraking = false;
         // Accelerate up to target speed
-        const accelRate = (settings.difficulty === 'arcade' ? 4.4 : 4.8) * ai.paceFactor;
+        const accelRate = (settings.difficulty === 'arcade' ? 4.0 : 4.6) * ai.paceFactor;
         ai.speedMs = Math.min(minSafeSpeedMs, ai.speedMs + accelRate * dt);
       }
 
