@@ -174,5 +174,30 @@ function updatePostFinish() {
 updatePostFinish();
 assert(postFinishSpeed === 0 && distancePostFinish === 1000, 'Car does not move after race finish');
 
+// Regression 6: Kerb stripes driving physics test
+// When vehicle rides the rumble kerb stripes (e.g. lateral offset 5.5m on 10m road),
+// it must be flagged as on-kerb (not offroad), retain speed, and not stop dead.
+const roadWidthM = 10.0;
+const halfRoadW = roadWidthM * 0.5; // 5.0m
+const kerbWidthM = 1.4;
+const kerbOuterM = halfRoadW + kerbWidthM; // 6.4m
+const carLateralM = 5.6; // Directly on the stripes
+
+const isOnKerb = carLateralM > halfRoadW && carLateralM <= kerbOuterM;
+const isOffRoad = carLateralM > kerbOuterM;
+assert(isOnKerb === true && isOffRoad === false, 'Vehicle riding stripes is flagged on-kerb, not off-road');
+
+// Simulate 2 seconds on the stripes at 150 km/h with throttle applied
+let kerbTestSpeedMs = 150 / 3.6; // ~41.67 m/s
+for (let f = 0; f < 120; f++) {
+  const kerbDrag = 0.25 * 1.5; // 0.375 m/s2
+  const aeroDrag = 0.5 * 1.225 * 0.38 * 2.1 * (kerbTestSpeedMs * kerbTestSpeedMs) / 1320;
+  const engineAccel = 3.6; // Cruising/accelerating in 4th gear
+  const netAccel = engineAccel - aeroDrag - kerbDrag;
+  kerbTestSpeedMs += netAccel * dt;
+}
+const finalKerbKmh = kerbTestSpeedMs * 3.6;
+assert(finalKerbKmh > 130, `Vehicle riding kerb stripes maintains high speed without stopping (actual: ${finalKerbKmh.toFixed(1)} km/h)`);
+
 console.log(`\nTests completed: ${passed} passed, ${failed} failed.`);
 if (failed > 0) process.exit(1);

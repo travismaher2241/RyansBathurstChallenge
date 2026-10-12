@@ -212,6 +212,7 @@ export class SoundEngine {
     gear: number,
     isSkidding: boolean,
     isOffRoad: boolean,
+    isOnKerb: boolean,
     isWallHit: boolean,
     trackArea: string
   ): void {
@@ -241,8 +242,8 @@ export class SoundEngine {
     const targetSkidVol = isSkidding ? 0.35 * this.sfxVolume : 0;
     if (this.skidGain) this.skidGain.gain.setTargetAtTime(targetSkidVol, t, 0.04);
 
-    // Surface Rumble (Off-road gravel / kerbs)
-    const targetRumbleVol = isOffRoad ? 0.4 * this.sfxVolume : 0;
+    // Surface Rumble (Off-road gravel / rumble kerb stripes)
+    const targetRumbleVol = (isOffRoad || isOnKerb) ? (isOnKerb ? 0.35 : 0.45) * this.sfxVolume : 0;
     if (this.rumbleGain) this.rumbleGain.gain.setTargetAtTime(targetRumbleVol, t, 0.05);
 
     // Wall Impact Sound

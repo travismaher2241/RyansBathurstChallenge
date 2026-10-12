@@ -342,6 +342,7 @@ export class BathurstArcadeGame {
       this.player.gear,
       this.player.isSkidding,
       this.player.isOffRoad,
+      this.player.isOnKerb,
       this.player.isWallHit,
       currentSample.area
     );

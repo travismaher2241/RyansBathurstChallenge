@@ -121,14 +121,16 @@ export const PHYSICS_CONFIG = {
   tyreScrubDragFactor: 0.6,
   slideRecoveryRate: 3.5,
 
-  // Off-track grass/dirt penalty
-  offRoadDragFactor: 1.85,
+  // Rumble Kerb (stripes) & Off-track grass/dirt dynamics
+  kerbWidthM: 1.4, // Width of red-and-white rumble kerb stripes
+  kerbDragFactor: 0.25, // Slight texture drag, allows attacking & riding kerbs cleanly
+  offRoadDragFactor: 1.2,
   offRoadMaxSpeedKmh: 120,
 
   // Collisions
   wallBounceRestitution: 0.3,
   carBounceRestitution: 0.45,
-  wallScrapeDecel: 8.0,
+  wallScrapeDecel: 3.5, // Glancing contact decel that doesn't freeze the car
 };
 
 export const CAMERA_CONFIG = {

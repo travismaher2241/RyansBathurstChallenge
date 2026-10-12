@@ -29,6 +29,7 @@ export class VehiclePhysics {
   // State flags
   public isBraking: boolean = false;
   public isSkidding: boolean = false;
+  public isOnKerb: boolean = false;
   public isOffRoad: boolean = false;
   public isWallHit: boolean = false;
   public isGhost: boolean = false;
@@ -64,6 +65,7 @@ export class VehiclePhysics {
     this.slipAngle = 0;
     this.isBraking = false;
     this.isSkidding = false;
+    this.isOnKerb = false;
     this.isOffRoad = false;
     this.isWallHit = false;
     this.isGhost = false;
@@ -183,13 +185,24 @@ export class VehiclePhysics {
     // Gradient effect: climbing takes effort, downhill accelerates!
     const gravityForce = -(sample.gradientPercent / 100) * 9.81 * 0.45;
 
-    // Off-road grass/dirt resistance
-    this.isOffRoad = Math.abs(this.lateralM) > halfRoadW;
+    // 3. Kerb Stripes, Off-road Grass, and Barrier Dynamics
+    const kerbOuterM = halfRoadW + PHYSICS_CONFIG.kerbWidthM;
+    const absLat = Math.abs(this.lateralM);
+
+    // Differentiate riding the rumble kerbs (stripes) vs true off-road grass/dirt
+    this.isOnKerb = absLat > halfRoadW && absLat <= kerbOuterM;
+    this.isOffRoad = absLat > kerbOuterM;
+
     let surfaceDrag = 0;
-    if (this.isOffRoad) {
-      surfaceDrag = PHYSICS_CONFIG.offRoadDragFactor * 6.0;
+    if (this.isOnKerb) {
+      // Riding the rumble kerbs (stripes): minor textural drag so the car maintains speed & drives right over them
+      surfaceDrag = PHYSICS_CONFIG.kerbDragFactor * 1.5;
+    } else if (this.isOffRoad) {
+      // Grass / dirt resistance: progressive slowing without stopping dead
+      const excessOffroad = absLat - kerbOuterM;
+      surfaceDrag = PHYSICS_CONFIG.offRoadDragFactor * Math.min(3.2, 1.2 + excessOffroad * 0.6);
       if (this.speedMs > PHYSICS_CONFIG.offRoadMaxSpeedKmh / 3.6) {
-        surfaceDrag += 8.0;
+        surfaceDrag += 2.8;
       }
     }
 
@@ -209,8 +222,9 @@ export class VehiclePhysics {
       ? PHYSICS_CONFIG.maxGripLatAccelMs2Arcade
       : PHYSICS_CONFIG.maxGripLatAccelMs2Pro;
 
-    // Steering lateral movement
-    const lateralSpeed = this.steerAngle * (this.speedMs * 0.32 + 3.0);
+    // Steering lateral movement (kerbs maintain high authority, grass reduces responsiveness slightly)
+    const steerFactor = this.isOffRoad ? 0.82 : (this.isOnKerb ? 0.96 : 1.0);
+    const lateralSpeed = this.steerAngle * (this.speedMs * 0.32 + 3.0) * steerFactor;
     this.lateralM += lateralSpeed * dt;
 
     // Track curvature naturally pulls the car outwards if not steering enough or going too fast!
@@ -232,17 +246,18 @@ export class VehiclePhysics {
     }
 
     // 5. Barrier & Wall Collisions
-    const barrierLimit = halfRoadW + 1.8;
+    // Barriers are positioned outside the kerb and verge
+    const barrierLimit = kerbOuterM + 1.2;
     this.isWallHit = false;
     if (!this.isGhost) {
       if (this.lateralM > barrierLimit) {
-        this.lateralM = barrierLimit;
-        this.lateralM -= 0.3; // Rebound
+        this.lateralM = barrierLimit - 0.4; // Rebound away from wall
+        this.steerAngle = -0.12; // Deflect steering back onto circuit
         this.speedMs = Math.max(0, this.speedMs - PHYSICS_CONFIG.wallScrapeDecel * dt);
         this.isWallHit = true;
       } else if (this.lateralM < -barrierLimit) {
-        this.lateralM = -barrierLimit;
-        this.lateralM += 0.3; // Rebound
+        this.lateralM = -barrierLimit + 0.4; // Rebound away from wall
+        this.steerAngle = 0.12; // Deflect steering back onto circuit
         this.speedMs = Math.max(0, this.speedMs - PHYSICS_CONFIG.wallScrapeDecel * dt);
         this.isWallHit = true;
       }
