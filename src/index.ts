@@ -4,6 +4,7 @@ import { RoadRenderer } from './render/roadRenderer';
 import { SceneryRenderer } from './render/sceneryRenderer';
 import { SpriteGenerator } from './render/spriteGenerator';
 import { SkyRenderer } from './render/skyRenderer';
+import { renderPeripheralTerrain } from './render/peripheralTerrain';
 import { CrtEffect } from './render/crtEffect';
 import { VehiclePhysics } from './physics/vehiclePhysics';
 import { AIManager } from './ai/aiManager';
@@ -455,7 +456,8 @@ export class BathurstArcadeGame {
     );
 
     // 2. Render Sky & Mountain Panorama Parallax Background
-    this.skyRenderer.render(ctx, screenW, horizonY, this.camera.headingRad);
+    this.skyRenderer.render(ctx, screenW, horizonY, this.camera.headingRad, camSample.height_m / this.settings.elevationExaggeration);
+    renderPeripheralTerrain(ctx, this.track, this.camera, screenW, screenH, horizonY, this.settings.elevationExaggeration);
 
     // 3. Render Projected Road Ribbon with Crest Occlusion
     this.roadRenderer.renderRoad(

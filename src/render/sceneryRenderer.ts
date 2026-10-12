@@ -3,6 +3,7 @@ import { SpriteGenerator } from './spriteGenerator';
 import { SceneryItem } from '../types/track';
 import { TrackManager } from '../track/trackManager';
 import { RenderedSegment } from './roadRenderer';
+import { createSceneryDetail, SceneryIndex } from './sceneryDetail';
 
 export interface DrawableObject {
   type: 'scenery' | 'car';
@@ -18,6 +19,8 @@ export interface DrawableObject {
 
 export class SceneryRenderer {
   public drawables: DrawableObject[] = [];
+  public showRaceWeekend: boolean = true;
+  private indexes = new WeakMap<TrackManager, SceneryIndex>();
 
   public prepareScenery(
     track: TrackManager,
@@ -39,9 +42,20 @@ export class SceneryRenderer {
       clipYBySegId.set(rs.segment.id, rs.clipY);
     }
 
-    const visibleScenery = track.getSceneryAhead(camera.s_m, 500);
+    let index = this.indexes.get(track);
+    if (!index) {
+      // Replace generic visual placeholders only; original data/colliders remain intact.
+      const replaced = new Set(['eucalyptus', 'campground', 'camp_tent', 'rock_face', 'pit_building', 'grandstand', 'paddock', 'hotel']);
+      index = new SceneryIndex([
+        ...track.scenery.filter(item => !replaced.has(item.sprite_key)),
+        ...createSceneryDetail(track),
+      ], track.lapLength);
+      this.indexes.set(track, index);
+    }
+    const visibleScenery = index.ahead(camera.s_m, 500);
 
     for (const item of visibleScenery) {
+      if (item.eventOnly && !this.showRaceWeekend) continue;
       // Ignore road markings (already drawn on road surface) and placement cue markers
       if (item.sprite_key === 'road_line' || item.sprite_key === 'crest_marker' || item.sprite_key === 'vista') {
         continue;
@@ -52,7 +66,7 @@ export class SceneryRenderer {
       const segId = sample.segmentId;
 
       // If the road segment is occluded by a hill in front of it, skip
-      if (occludedBySegId.get(segId) === true) {
+      if (occludedBySegId.get(segId) === true || !clipYBySegId.has(segId)) {
         continue;
       }
 
@@ -84,7 +98,9 @@ export class SceneryRenderer {
       let worldW = item.width_m_estimate || 4.0;
       let worldH_est = item.height_m_estimate || 4.0;
 
-      if (spriteKey === 'pit_building') {
+      if (item.detail) {
+        // Detail artwork has explicit world dimensions, including low orchard trees.
+      } else if (spriteKey === 'pit_building') {
         worldW = 28.0;
         worldH_est = 7.0;
       } else if (spriteKey === 'grandstand') {
@@ -119,6 +135,7 @@ export class SceneryRenderer {
       // True 3D perspective scale: 1 metre = proj.scale pixels on screen
       const destW = Math.max(2, worldW * proj.scale);
       const destH = Math.max(2, worldH_est * proj.scale);
+      if (proj.x + destW / 2 < 0 || proj.x - destW / 2 > screenW) continue;
       const clipY = clipYBySegId.get(segId) ?? screenH;
 
       this.drawables.push({

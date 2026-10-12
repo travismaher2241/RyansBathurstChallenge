@@ -3,6 +3,7 @@ export class SkyRenderer {
   private skyCtx: CanvasRenderingContext2D;
   private readonly width = 1200;
   private readonly height = 300;
+  private valleyCanvas: HTMLCanvasElement;
 
   constructor() {
     this.skyCanvas = document.createElement('canvas');
@@ -10,6 +11,44 @@ export class SkyRenderer {
     this.skyCanvas.height = this.height;
     this.skyCtx = this.skyCanvas.getContext('2d')!;
     this.generateSkyTexture();
+    this.valleyCanvas = document.createElement('canvas');
+    this.valleyCanvas.width = this.width;
+    this.valleyCanvas.height = this.height;
+    this.generateValleyTexture();
+  }
+
+  private generateValleyTexture(): void {
+    const ctx = this.valleyCanvas.getContext('2d')!;
+    const w = this.width, h = this.height;
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#508fb8'); sky.addColorStop(.65, '#b5ccd0'); sky.addColorStop(1, '#e1d9b6');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+    // Periodic ridges avoid a seam at north. A distant valley rather than a
+    // near mountain wall makes the view open out as the car climbs.
+    for (let layer = 0; layer < 3; layer++) {
+      ctx.fillStyle = ['#92a8a4', '#9fae95', '#abb18b'][layer];
+      ctx.beginPath(); ctx.moveTo(0, h);
+      for (let x = 0; x <= w; x += 4) {
+        const a = x / w * Math.PI * 2;
+        ctx.lineTo(x, 195 + layer * 24 + Math.sin(a * 3) * (9 - layer * 2) + Math.cos(a * 7) * 4);
+      }
+      ctx.lineTo(w, h); ctx.closePath(); ctx.fill();
+    }
+    // An artistic Bathurst basin: soft patchwork fields and a small town,
+    // not surveyed building positions. World-heading scrolling anchors the view.
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 24; col++) {
+        const x = col * 50 + (row % 2) * 12, y = 252 + row * 12;
+        ctx.fillStyle = ['#b8b489', '#a4ad82', '#c3b991', '#a4aa80'][(col * 7 + row) % 4];
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+43,y-3); ctx.lineTo(x+50,y+8); ctx.lineTo(x+3,y+10); ctx.fill();
+        ctx.strokeStyle = '#919f7e'; ctx.lineWidth = .6;
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+43,y-3); ctx.stroke();
+      }
+    }
+    for (let i = 0; i < 100; i++) {
+      const x = 340 + (i * 37 % 290), y = 242 + (i * 13 % 23);
+      ctx.fillStyle = i % 3 ? '#c7c6b2' : '#9d9e94'; ctx.fillRect(x,y,3 + i % 5,2);
+    }
   }
 
   private generateSkyTexture(): void {
@@ -106,7 +145,7 @@ export class SkyRenderer {
     ctx.stroke();
   }
 
-  public render(ctx: CanvasRenderingContext2D, screenW: number, horizonY: number, cameraHeadingRad: number): void {
+  public render(ctx: CanvasRenderingContext2D, screenW: number, horizonY: number, cameraHeadingRad: number, trackHeightM: number = 0): void {
     // Parallax scrolling based on camera heading
     const normalizedHeading = ((cameraHeadingRad % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     const scrollX = (normalizedHeading / (Math.PI * 2)) * this.width;
@@ -114,18 +153,27 @@ export class SkyRenderer {
     const destH = Math.max(120, horizonY);
     const destY = horizonY - destH;
 
-    // Draw repeating sky slices across the screen
+    // Blend with physical climb height; no camera/road changes or sudden sector switch.
+    const valleyBlend = Math.max(0, Math.min(1, (trackHeightM - 65) / 85));
+    // A fixed angular field of view also keeps the panorama stable on resize.
+    const panoramaScale = screenW / (this.width * 0.42);
     let currentDestX = 0;
     let sourceX = scrollX % this.width;
 
     while (currentDestX < screenW) {
-      const sliceW = Math.min(this.width - sourceX, screenW - currentDestX);
+      const sliceW = Math.min(this.width - sourceX, (screenW - currentDestX) / panoramaScale);
       ctx.drawImage(
         this.skyCanvas,
         sourceX, 0, sliceW, this.height,
-        currentDestX, destY, sliceW, destH
+        currentDestX, destY, sliceW * panoramaScale, destH
       );
-      currentDestX += sliceW;
+      if (valleyBlend > 0) {
+        ctx.save(); ctx.globalAlpha = valleyBlend;
+        ctx.drawImage(this.valleyCanvas, sourceX, 0, sliceW, this.height,
+          currentDestX, destY, sliceW * panoramaScale, destH);
+        ctx.restore();
+      }
+      currentDestX += sliceW * panoramaScale;
       sourceX = 0;
     }
   }

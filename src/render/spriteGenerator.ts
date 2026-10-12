@@ -1,3 +1,5 @@
+import { createDetailSprites } from './sceneryDetailSprites';
+
 export interface CarSpriteSet {
   straight: HTMLCanvasElement;
   slightLeft: HTMLCanvasElement;
@@ -208,6 +210,7 @@ export class SpriteGenerator {
     this.scenerySprites['brake_board_100'] = this.drawBrakeBoard('100');
     this.scenerySprites['tower'] = this.drawSkylineTower(40, 160);
     this.scenerySprites['tree_mountain'] = this.drawMountainTree(54, 95);
+    createDetailSprites(this.scenerySprites);
   }
 
   // --- CAR SPRITE GENERATION ---
