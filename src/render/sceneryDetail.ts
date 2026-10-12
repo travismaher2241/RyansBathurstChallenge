@@ -16,19 +16,19 @@ export function createSceneryDetail(track: TrackManager): SceneryDetail[] {
     const east = p.east_m + p.normalE * offset;
     const north = p.north_m + p.normalN * offset;
 
-    // Overhead bridges span directly across the road (offset ~ 0), and rock faces/signs hug the barriers or mountain.
+    // Overhead bridges span directly across the road (offset ~ 0), and hillside banks/signs hug the terrain.
     const isBridge = key === 'bridge';
-    const isWallOrSign = key.includes('rock') || key.includes('bank') || key.includes('sign');
+    const isBankOrSign = key.includes('bank') || key.includes('sign');
 
     if (!isBridge) {
-      // Keep other billboard footprints clear of road segments
+      // Keep billboard footprints strictly clear of road segments
       for (const segment of track.segments) {
         const dx = segment.east_end_m - segment.east_start_m;
         const dy = segment.north_end_m - segment.north_start_m;
         const t = Math.max(0, Math.min(1, ((east - segment.east_start_m) * dx +
           (north - segment.north_start_m) * dy) / (dx * dx + dy * dy || 1)));
         const distance = Math.hypot(east - segment.east_start_m - t * dx, north - segment.north_start_m - t * dy);
-        const minDistance = isWallOrSign ? (segment.road_width_m / 2 + 1.5) : (segment.road_width_m / 2 + width / 2 + 5);
+        const minDistance = segment.road_width_m / 2 + width / 2 + (isBankOrSign ? 1.5 : 5);
         if (distance < minDistance) return;
       }
     }
@@ -77,13 +77,6 @@ export function createSceneryDetail(track: TrackManager): SceneryDetail[] {
   }
   for (const s of [540, 830, 1030, 4060, 4730]) {
     add('country_house', s, s < 1500 ? 78 : -95, 16, 6);
-  }
-  // Landmark 1: The Cutting sheer red-ochre sandstone rock face (inside left apex and climbing wall)
-  for (let s = 1380; s <= 1650; s += 28) {
-    add('rock_face', s, -14, 28, 14);
-  }
-  for (let s = 1680; s <= 1920; s += 30) {
-    add('rock_face', s, -16, 26, 12);
   }
 
   // Landmark 2: Giant "MOUNT PANORAMA" hillside lettering
