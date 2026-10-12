@@ -42,7 +42,7 @@ export class RaceManager {
     this.standings = [];
   }
 
-  public startRace(mode: GameMode, player: VehiclePhysics, ai: AIManager, sound: SoundEngine): void {
+  public startRace(mode: GameMode, player: VehiclePhysics, ai: AIManager, sound: SoundEngine, settings?: GameSettings): void {
     this.mode = mode;
     this.state = 'countdown';
     this.countdownTimer = 3.9;
@@ -60,7 +60,7 @@ export class RaceManager {
       this.totalLaps = 3;
       // Slot 8 on starting grid on Pit Straight (s = 6080m)
       player.resetAll(6080, 2.2, false);
-      ai.resetGrid();
+      ai.resetGrid(settings?.carChoice || 'redbull');
     } else if (mode === 'timetrial') {
       this.totalLaps = 99;
       // Standing start on Pit Straight run-up (s = 6180m)
@@ -71,7 +71,7 @@ export class RaceManager {
       player.resetAll(0, 0, true);
     }
 
-    this.updateStandings(player, ai);
+    this.updateStandings(player, ai, settings);
     sound.playCountdown(false);
   }
 
@@ -106,7 +106,7 @@ export class RaceManager {
     this.raceElapsedTime += dt;
 
     // Update standings and finish tracking
-    this.updateStandings(player, ai);
+    this.updateStandings(player, ai, settings);
 
     // Final lap notice in Arcade race: announce ONCE
     if (this.mode === 'arcade' && player.currentLap === this.totalLaps && !this.hasAnnouncedFinalLap) {
@@ -145,16 +145,18 @@ export class RaceManager {
     }
   }
 
-  public updateStandings(player: VehiclePhysics, ai: AIManager): void {
+  public updateStandings(player: VehiclePhysics, ai: AIManager, settings?: GameSettings): void {
     const list: DriverStanding[] = [];
 
     const playerFinished = this.mode === 'arcade' && player.currentLap > this.totalLaps;
     const playerFinishTime = playerFinished ? this.playerFinalTime || this.raceElapsedTime : null;
 
+    const teamLabel = settings ? (settings.carChoice === 'shell' ? ' (Shell #17)' : ' (Red Bull #88)') : '';
+
     // Add Player
     list.push({
       id: 0,
-      name: 'Player',
+      name: `Player${teamLabel}`,
       isPlayer: true,
       totalDistance: player.totalDistance_m,
       currentLap: Math.min(player.currentLap, this.totalLaps),
@@ -231,11 +233,11 @@ export class RaceManager {
     return p ? p.position : 1;
   }
 
-  private finishRace(player: VehiclePhysics, ai: AIManager, sound: SoundEngine, _settings: GameSettings): void {
+  private finishRace(player: VehiclePhysics, ai: AIManager, sound: SoundEngine, settings: GameSettings): void {
     this.state = 'finished';
     this.playerFinalTime = this.raceElapsedTime;
     player.freeze();
-    this.updateStandings(player, ai);
+    this.updateStandings(player, ai, settings);
     this.playerFinalPosition = this.getPlayerPosition();
     sound.playFinish();
   }

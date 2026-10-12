@@ -35,10 +35,37 @@ export class MenuManager {
   }
 
   public showTitleScreen(settings: GameSettings): void {
+    const isRedBull = settings.carChoice === 'redbull';
+    const isShell = settings.carChoice === 'shell';
+
     this.overlay.innerHTML = `
       <div class="menu-screen">
         <h1 class="menu-title">BATHURST ARCADE</h1>
         <p class="menu-subtitle">MOUNT PANORAMA • 6,213M HISTORIC RECONSTRUCTION</p>
+
+        <!-- V8 Supercars Team Selection -->
+        <div class="team-picker-section">
+          <div class="team-picker-title">CHOOSE YOUR V8 SUPERCAR:</div>
+          <div class="team-cards-row">
+            <button id="pick-redbull" class="team-card ${isRedBull ? 'active-redbull' : ''}">
+              <div class="team-card-badge redbull-bg">88</div>
+              <div class="team-card-text">
+                <div class="team-card-name">RED BULL AMPOL RACING</div>
+                <div class="team-card-car">CHEVROLET CAMARO ZL1 • #88</div>
+              </div>
+              ${isRedBull ? '<span class="team-check">✓ SELECTED</span>' : ''}
+            </button>
+
+            <button id="pick-shell" class="team-card ${isShell ? 'active-shell' : ''}">
+              <div class="team-card-badge shell-bg">17</div>
+              <div class="team-card-text">
+                <div class="team-card-name">SHELL V-POWER RACING</div>
+                <div class="team-card-car">FORD MUSTANG GT • #17</div>
+              </div>
+              ${isShell ? '<span class="team-check">✓ SELECTED</span>' : ''}
+            </button>
+          </div>
+        </div>
 
         <div class="menu-btn-group">
           <button id="btn-arcade" class="menu-btn primary">ARCADE RACE (3 LAPS)</button>
@@ -49,6 +76,20 @@ export class MenuManager {
         </div>
       </div>
     `;
+
+    document.getElementById('pick-redbull')?.addEventListener('click', () => {
+      settings.carChoice = 'redbull';
+      saveStoredSettings(settings);
+      this.onSettingsChanged(settings);
+      this.showTitleScreen(settings);
+    });
+
+    document.getElementById('pick-shell')?.addEventListener('click', () => {
+      settings.carChoice = 'shell';
+      saveStoredSettings(settings);
+      this.onSettingsChanged(settings);
+      this.showTitleScreen(settings);
+    });
 
     document.getElementById('btn-arcade')?.addEventListener('click', () => this.onStartRace('arcade'));
     document.getElementById('btn-timetrial')?.addEventListener('click', () => this.onStartRace('timetrial'));
@@ -83,6 +124,14 @@ export class MenuManager {
     this.overlay.innerHTML = `
       <div class="menu-screen">
         <h1 class="menu-title">SETTINGS</h1>
+
+        <div class="menu-settings-row">
+          <label for="set-car">SUPERCAR TEAM</label>
+          <select id="set-car" class="menu-select">
+            <option value="redbull" ${settings.carChoice === 'redbull' ? 'selected' : ''}>RED BULL AMPOL #88 (CAMARO ZL1)</option>
+            <option value="shell" ${settings.carChoice === 'shell' ? 'selected' : ''}>SHELL V-POWER #17 (MUSTANG GT)</option>
+          </select>
+        </div>
 
         <div class="menu-settings-row">
           <label for="set-difficulty">DIFFICULTY</label>
@@ -122,12 +171,14 @@ export class MenuManager {
     `;
 
     document.getElementById('btn-save')?.addEventListener('click', () => {
+      const carEl = document.getElementById('set-car') as HTMLSelectElement;
       const diffEl = document.getElementById('set-difficulty') as HTMLSelectElement;
       const transEl = document.getElementById('set-transmission') as HTMLSelectElement;
       const autoEl = document.getElementById('set-auto-accel') as HTMLInputElement;
       const crtEl = document.getElementById('set-crt') as HTMLInputElement;
       const soundEl = document.getElementById('set-sound') as HTMLInputElement;
 
+      if (carEl) settings.carChoice = carEl.value as 'redbull' | 'shell';
       settings.difficulty = diffEl.value as 'arcade' | 'pro';
       settings.transmission = transEl.value as 'auto' | 'manual';
       settings.autoAccelerate = autoEl.checked;

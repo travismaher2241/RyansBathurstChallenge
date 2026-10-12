@@ -6,6 +6,7 @@ export const TRACK_LAP_LENGTH_M = 6213;
 export const DEFAULT_SETTINGS: GameSettings = {
   difficulty: 'arcade',
   transmission: 'auto',
+  carChoice: 'redbull',
   autoAccelerate: false,
   crtFilter: false,
   soundEnabled: true,

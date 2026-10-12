@@ -1,7 +1,7 @@
 import { TrackManager } from '../track/trackManager';
 import { TRACK_LAP_LENGTH_M, PHYSICS_CONFIG, AI_CONFIG } from '../config/gameConfig';
 import { wrap, clamp, lerp } from '../utils/math';
-import { GameSettings } from '../types/track';
+import { GameSettings, CarChoice } from '../types/track';
 
 export interface OpponentCar {
   id: number;
@@ -23,36 +23,47 @@ export interface OpponentCar {
   finishTime: number | null;
 }
 
-const AI_NAMES = [
-  'P. Brock',
-  'D. Johnson',
-  'A. Moffat',
-  'J. Richards',
-  'G. Seton',
-  'L. Perkins',
-  'J. Bowe',
-];
-
 export class AIManager {
   public opponents: OpponentCar[] = [];
 
   constructor() {
-    this.resetGrid();
+    this.resetGrid('redbull');
   }
 
-  public resetGrid(): void {
+  public resetGrid(playerChoice: CarChoice = 'redbull'): void {
     this.opponents = [];
+    const gridRoster = playerChoice === 'redbull'
+      ? [
+          { name: 'W. Davison', livery: 1 },  // Shell V-Power #17 (Arch-rival)
+          { name: 'C. Mostert', livery: 4 },  // Mobil 1 Optus #25
+          { name: 'C. Waters', livery: 2 },   // Monster Energy #6
+          { name: 'M. Payne', livery: 3 },    // Penrite Racing #19
+          { name: 'T. Randle', livery: 5 },   // Castrol Racing #55
+          { name: 'J. Le Brocq', livery: 6 }, // Tradie Racing #34
+          { name: 'N. Percat', livery: 7 },   // Bendix Racing #10
+        ]
+      : [
+          { name: 'B. Feeney', livery: 0 },   // Red Bull Ampol #88 (Arch-rival)
+          { name: 'C. Mostert', livery: 4 },  // Mobil 1 Optus #25
+          { name: 'C. Waters', livery: 2 },   // Monster Energy #6
+          { name: 'M. Payne', livery: 3 },    // Penrite Racing #19
+          { name: 'T. Randle', livery: 5 },   // Castrol Racing #55
+          { name: 'J. Le Brocq', livery: 6 }, // Tradie Racing #34
+          { name: 'N. Percat', livery: 7 },   // Bendix Racing #10
+        ];
+
     // Place 7 opponents on the starting grid ahead of the player (grid boxes behind timing line)
     // Staggered grid on Pit Straight: slots at 6100m, 6120m, 6140m ... 6190m
     for (let i = 0; i < AI_CONFIG.carCount; i++) {
       const s = wrap(6100 + i * 14, TRACK_LAP_LENGTH_M);
       const lateral = (i % 2 === 0) ? -2.2 : 2.2;
       const pace = 0.86 + (i * 0.012); // P7 starts at 0.86, P1 leader at ~0.932
+      const entry = gridRoster[i] || { name: `Driver ${i + 1}`, livery: (i + 1) % 8 };
 
       this.opponents.push({
         id: i + 1,
-        name: AI_NAMES[i % AI_NAMES.length],
-        liveryIndex: (i + 1) % 8,
+        name: entry.name,
+        liveryIndex: entry.livery,
         s_m: s,
         totalDistance_m: s,
         lateralM: lateral,

@@ -96,10 +96,12 @@ export interface TrackData {
 }
 
 export type GameMode = 'arcade' | 'timetrial' | 'practice';
+export type CarChoice = 'redbull' | 'shell';
 
 export interface GameSettings {
   difficulty: 'arcade' | 'pro';
   transmission: 'auto' | 'manual';
+  carChoice: CarChoice;
   autoAccelerate: boolean;
   crtFilter: boolean;
   soundEnabled: boolean;

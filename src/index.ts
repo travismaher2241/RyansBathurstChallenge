@@ -200,7 +200,7 @@ export class BathurstArcadeGame {
     this.sound.resume();
     this.menus.hide();
     this.isPaused = false;
-    this.race.startRace(mode, this.player, this.ai, this.sound);
+    this.race.startRace(mode, this.player, this.ai, this.sound, this.settings);
     this.updateTouchShiftButtons();
   }
 
@@ -566,7 +566,8 @@ export class BathurstArcadeGame {
 
   private renderPlayerCar(screenW: number, screenH: number): void {
     const ctx = this.ctx;
-    const sprites = this.spriteGen.carSprites[0]; // Livery 0 (Player)
+    const playerLiveryIndex = this.settings.carChoice === 'shell' ? 1 : 0;
+    const sprites = this.spriteGen.carSprites[playerLiveryIndex] || this.spriteGen.carSprites[0];
 
     // Select sprite angle based on steerAngle
     const steer = this.player.steerAngle;
@@ -592,11 +593,11 @@ export class BathurstArcadeGame {
       ctx.globalAlpha = 0.45;
     }
 
-    // Render large retro touring car near bottom center with subtle lateral responsiveness
-    const carW = 200;
-    const carH = 120;
+    // Render large aggressive Gen3 V8 Supercar near bottom center with responsive lateral lean
+    const carW = 210;
+    const carH = 126;
     const carX = (screenW - carW) * 0.5 + this.player.lateralM * 14;
-    const carY = screenH - carH - 12;
+    const carY = screenH - carH - 10;
 
     ctx.drawImage(carCanvas, carX, carY, carW, carH);
     ctx.globalAlpha = 1.0;
