@@ -7,6 +7,14 @@ export interface SceneryDetail extends SceneryItem {
   eventOnly?: boolean;
 }
 
+export const BRIDGE_LAYOUT = { canvasWidth: 340, canvasHeight: 110, pillarWidth: 28, beamHeight: 34, widthM: 24, heightM: 7.5 };
+
+export function createRenderScenery(track: TrackManager): SceneryDetail[] {
+  const replaced = new Set(['eucalyptus', 'campground', 'camp_tent', 'rock_face',
+    'bridge', 'pit_building', 'grandstand', 'paddock', 'hotel']);
+  return [...track.scenery.filter(item => !replaced.has(item.sprite_key)), ...createSceneryDetail(track)];
+}
+
 export function createSceneryDetail(track: TrackManager): SceneryDetail[] {
   const result: SceneryDetail[] = [];
   let seed = 1938;
@@ -86,16 +94,8 @@ export function createSceneryDetail(track: TrackManager): SceneryDetail[] {
   add('hillside_sign', 4850, 130, 85, 18);
 
   // Landmark 3: Authentic overhead pedestrian bridges & race gantries spanning track
-  add('bridge', 6060, 0, 24, 7.5); // Pit Straight start/finish gantry
-  add('bridge', 680, 0, 24, 7.5);  // Mountain Straight pedestrian bridge
-  add('bridge', 5660, 0, 24, 7.5); // Lower Conrod Straight / Chase approach bridge
-
-  // Rock banks stand behind the existing barriers. Their uneven silhouettes
-  // provide slope without modifying the road mesh or its elevation.
-  for (let s = 1550; s < 1940; s += 24) {
-    add('cutting_bank', s, 27, 20, 8 + random() * 5);
-    if (s % 48 < 24) add('dry_scrub', s + 3, 32, 6, 3);
-  }
+  for (const s of [6060, 680, 5660]) add('bridge', s, 0, BRIDGE_LAYOUT.widthM, BRIDGE_LAYOUT.heightM);
+  // The Cutting uses the continuous wall in RoadRenderer, not rock billboards.
   // Permanent clearings, with a separate race-weekend dressing layer.
   for (let s = 2020; s < 3100; s += 39) {
     const side = s < 2700 ? 1 : -1;

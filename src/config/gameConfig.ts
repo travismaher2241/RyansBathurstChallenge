@@ -1,4 +1,5 @@
 import { GameSettings } from '../types/track';
+import { ROAD_KERB_WIDTH_M } from '../track/trackBoundaries';
 export type { GameSettings };
 
 export const TRACK_LAP_LENGTH_M = 6213;
@@ -122,7 +123,7 @@ export const PHYSICS_CONFIG = {
   slideRecoveryRate: 3.5,
 
   // Rumble Kerb (stripes) & Off-track grass/dirt dynamics
-  kerbWidthM: 1.4, // Width of red-and-white rumble kerb stripes
+  kerbWidthM: ROAD_KERB_WIDTH_M,
   kerbDragFactor: 0.25, // Slight texture drag, allows attacking & riding kerbs cleanly
   offRoadDragFactor: 1.2,
   offRoadMaxSpeedKmh: 120,

@@ -1,4 +1,5 @@
 import { createDetailSprites } from './sceneryDetailSprites';
+import { BRIDGE_LAYOUT } from './sceneryDetail';
 
 export interface CarSpriteSet {
   straight: HTMLCanvasElement;
@@ -198,7 +199,7 @@ export class SpriteGenerator {
     this.scenerySprites['rock_face'] = this.drawRockFace(260, 150);
     this.scenerySprites['campground'] = this.drawCampground(130, 60);
     this.scenerySprites['camp_tent'] = this.drawCampTent(45, 32);
-    this.scenerySprites['bridge'] = this.drawBridge(340, 110);
+    this.scenerySprites['bridge'] = this.drawBridge(BRIDGE_LAYOUT.canvasWidth, BRIDGE_LAYOUT.canvasHeight);
     this.scenerySprites['hotel'] = this.drawHotel(160, 75);
     this.scenerySprites['farm'] = this.drawFarm(120, 55);
     this.scenerySprites['museum'] = this.drawMuseum(160, 65);
@@ -914,8 +915,8 @@ export class SpriteGenerator {
     canvas.height = h;
     const ctx = canvas.getContext('2d')!;
 
-    const pillarW = 28;
-    const beamH = 34;
+    const pillarW = BRIDGE_LAYOUT.pillarWidth;
+    const beamH = BRIDGE_LAYOUT.beamHeight;
 
     // 1. Concrete foundation pillars (left & right)
     ctx.fillStyle = '#64748b'; // Concrete body

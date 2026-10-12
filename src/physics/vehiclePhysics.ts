@@ -2,6 +2,7 @@ import { PHYSICS_CONFIG, TRACK_LAP_LENGTH_M, MIN_VALID_LAP_TIME_SEC, saveBestLap
 import { TrackManager, SampledPoint } from '../track/trackManager';
 import { wrap, clamp, lerp } from '../utils/math';
 import { GameSettings } from '../types/track';
+import { CAR_HALF_WIDTH_M, getCuttingWallHeight, getCuttingWallOffset } from '../track/trackBoundaries';
 
 export interface CarInputs {
   throttle: number; // 0 to 1
@@ -63,7 +64,7 @@ export class VehiclePhysics {
     this.resetAll(initialS, initialLateralM);
   }
 
-  public resetAll(initialS: number, initialLateralM: number, autoStartLap: boolean = false): void {
+  public resetAll(initialS: number, initialLateralM: number, autoStartLap: boolean = false, difficulty: GameSettings['difficulty'] = 'arcade'): void {
     this.s_m = initialS;
     this.totalDistance_m = initialS;
     this.lateralM = initialLateralM;
@@ -92,7 +93,7 @@ export class VehiclePhysics {
     this.cpConrod = false;
     this.cpChase = false;
     this.offRoadTimer = 0;
-    this.lapDifficulty = 'arcade';
+    this.lapDifficulty = difficulty;
     this.shiftCooldownTimer = 0;
     this.smoothedCurvature = 0;
   }
@@ -113,6 +114,10 @@ export class VehiclePhysics {
   }
 
   public resetToTrack(): void {
+    // Recovery assistance must never produce a competitive lap record.
+    // Preserve earlier valid session bests; only this lap becomes ineligible.
+    this.lapValid = false;
+    this.lapInvalidReason = 'CAR RESET';
     // Place car safely ahead in track centre at moderate speed with ghost period
     this.lateralM = 0;
     this.speedMs = Math.min(this.speedMs, 14.0); // ~50 km/h
@@ -190,7 +195,10 @@ export class VehiclePhysics {
       const rawAccel = (wheelPowerW / (PHYSICS_CONFIG.massKg * effSpeed)) * throttle;
       // Launch traction limit on Dunlop 18" racing slicks (~0.85G launch)
       const tractionLimit = 8.35;
-      accelForce = Math.min(tractionLimit, rawAccel);
+      // Fuel cut approaching redline. Do not clamp road speed: a downhill car
+      // may coast above the gear limit, but cannot accelerate there under power.
+      const limiter = clamp((1 - gearSpeedRatio) / 0.02, 0, 1);
+      accelForce = Math.min(tractionLimit, rawAccel) * limiter;
     }
 
     // Aerodynamic and rolling resistance
@@ -281,6 +289,9 @@ export class VehiclePhysics {
     // 5. Barrier & Wall Collisions
     // Barriers are positioned outside the kerb and verge
     const barrierLimit = kerbOuterM + 1.2;
+    const leftBarrierLimit = getCuttingWallHeight(this.s_m) > 0
+      ? getCuttingWallOffset(sample.roadWidth_m) - CAR_HALF_WIDTH_M
+      : barrierLimit;
     this.isWallHit = false;
     if (!this.isGhost) {
       if (this.lateralM > barrierLimit) {
@@ -292,8 +303,8 @@ export class VehiclePhysics {
           this.lapValid = false;
           this.lapInvalidReason = 'WALL CONTACT';
         }
-      } else if (this.lateralM < -barrierLimit) {
-        this.lateralM = -barrierLimit; // Smooth clamp without teleport judder
+      } else if (this.lateralM < -leftBarrierLimit) {
+        this.lateralM = -leftBarrierLimit; // Car body meets the visible wall
         this.steerAngle = 0.15; // Deflect steering back onto circuit
         this.speedMs = Math.max(0, this.speedMs - PHYSICS_CONFIG.wallScrapeDecel * 2.5 * dt);
         this.isWallHit = true;
@@ -394,7 +405,8 @@ export class VehiclePhysics {
         this.gear++;
         this.shiftCooldownTimer = 0.22;
       }
-      if (inputs.shiftDown && this.gear > 1 && this.shiftCooldownTimer <= 0) {
+      if (inputs.shiftDown && this.gear > 1 && this.shiftCooldownTimer <= 0 &&
+          speedKmh <= PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 2]) {
         this.gear--;
         this.shiftCooldownTimer = 0.22;
       }
@@ -402,7 +414,7 @@ export class VehiclePhysics {
 
     // Compute Engine RPM based on current gear ratio and wheel speed
     const currentGearTop = PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1];
-    const gearSpeedRatio = clamp(speedKmh / currentGearTop, 0, 1.15);
+    const gearSpeedRatio = clamp(speedKmh / currentGearTop, 0, 1);
     const targetRpm = lerp(PHYSICS_CONFIG.idleRpm, PHYSICS_CONFIG.redlineRpm, gearSpeedRatio);
 
     this.rpm = lerp(this.rpm, targetRpm, dt * 12);

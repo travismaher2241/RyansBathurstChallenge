@@ -3,17 +3,19 @@
 This is an artistic, race-weekend interpretation of the circuit surroundings,
 not a surveyed reconstruction of individual trees or buildings.
 
-The road data, road renderer, barriers, physics, AI, camera and lap timing are
-unchanged. `sceneryDetail.ts` generates deterministic, non-collidable decorations
-in a render-only collection. It rejects placements whose billboard footprint
-comes within five metres of any road edge, including neighbouring track sections.
-It replaces selected old visual placeholders without mutating track scenery.
+The track centreline, road widths and elevation data are unchanged.
+`sceneryDetail.ts` generates deterministic, non-collidable decorations in a
+render-only collection. Ground scenery keeps five metres of road clearance
+(hillside signs use 1.5 metres). Overhead bridges instead have separate support
+and beam-clearance checks. Original bridge placeholders are replaced, not doubled.
+The Cutting's continuous wall shares its position with collision code through
+`trackBoundaries.ts`, with clearance for the player's car body.
 
 ## Appearance
 
 - Eight gum silhouettes, clustered around clearings, with open rural straights.
 - Vineyard rows near Griffin's Bend and orchard rows along Conrod.
-- Rock banks at The Cutting and ground backing beneath uphill scenery.
+- A continuous wall at The Cutting and ground backing beneath uphill scenery.
 - Caravans, dome tents, parked utes and spectators across the mountain parks.
 - Modular pit, grandstand, paddock and hotel structures.
 - A heading-anchored distant valley with fields and a town silhouette that
@@ -21,7 +23,8 @@ It replaces selected old visual placeholders without mutating track scenery.
 
 Artwork is cached Canvas 2D, matching the existing rendering architecture.
 Scenery uses a sorted visibility index, horizontal culling and existing road
-crest clipping. `SceneryRenderer.showRaceWeekend` separates temporary decorations
+crest clipping. Nearer wall faces also mask scenery and opponents behind them.
+`SceneryRenderer.showRaceWeekend` separates temporary decorations
 from permanent scenery; it defaults to true without adding a new settings menu.
 Ground follows the existing road elevation at each anchor. Historical scenery
 terrain-height estimates are deliberately not applied: accurate off-road terrain
@@ -40,5 +43,9 @@ tree species silhouettes, town buildings and dimensions remain estimates.
 
 ## Checks
 
-`npx tsc --noEmit`, `npm run build`, `node test_suite.cjs`, and
-`node scripts/test-scenery.cjs`.
+`npx tsc --noEmit`, `npm run build`, and `npm test`.
+
+The test command covers geometry, the actual gameplay modules (gear limits,
+reset eligibility, difficulty-specific records, wall contact, sector selection
+and a three-lap Arcade simulation), and scenery placement/occlusion. Tests run
+against in-memory storage and do not change browser records.

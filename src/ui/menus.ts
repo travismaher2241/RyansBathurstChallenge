@@ -6,18 +6,18 @@ import { formatLapTime } from '../utils/math';
 
 export const BATHURST_SECTORS = [
   { name: 'Pit Straight (Start/Finish)', s: 0 },
-  { name: 'Hell Corner (Turn 1)', s: 310 },
+  { name: 'Hell Corner (Turn 1)', s: 240 },
   { name: 'Mountain Straight', s: 650 },
   { name: "Griffin's Bend (Turn 2)", s: 1450 },
   { name: 'The Cutting (Turn 3/4)', s: 1750 },
   { name: 'Reid Park & Sulman (Turn 5/6)', s: 2100 },
-  { name: 'McPhillamy Park (Turn 10)', s: 2700 },
-  { name: "Brock's Skyline (Turn 11)", s: 3050 },
+  { name: 'McPhillamy Park (Turn 10)', s: 2900 },
+  { name: "Brock's Skyline (Turn 11)", s: 3150 },
   { name: 'The Esses & Dipper (Turns 12-17)', s: 3300 },
-  { name: "Forrest's Elbow (Turn 18)", s: 3900 },
+  { name: "Forrest's Elbow (Turn 18)", s: 3700 },
   { name: 'Conrod Straight', s: 4250 },
   { name: 'The Chase (Turns 20-22)', s: 5250 },
-  { name: "Murray's Corner (Turn 23)", s: 5850 },
+  { name: "Murray's Corner (Turn 23)", s: 5920 },
 ];
 
 export class MenuManager {

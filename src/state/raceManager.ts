@@ -59,16 +59,16 @@ export class RaceManager {
     if (mode === 'arcade') {
       this.totalLaps = 3;
       // Slot 8 on starting grid on Pit Straight (s = 6080m)
-      player.resetAll(6080, 2.2, false);
+      player.resetAll(6080, 2.2, false, settings?.difficulty);
       ai.resetGrid(settings?.carChoice || 'redbull');
     } else if (mode === 'timetrial') {
       this.totalLaps = 99;
       // Standing start on Pit Straight run-up (s = 6180m)
-      player.resetAll(6180, 0, false);
+      player.resetAll(6180, 0, false, settings?.difficulty);
     } else {
       // Practice: start directly at start line with lap 1 active
       this.totalLaps = 99;
-      player.resetAll(0, 0, true);
+      player.resetAll(0, 0, true, settings?.difficulty);
     }
 
     this.updateStandings(player, ai, settings);

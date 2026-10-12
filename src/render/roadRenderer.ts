@@ -1,6 +1,7 @@
 import { Camera, ProjectedPoint } from './camera';
 import { TrackManager } from '../track/trackManager';
 import { Segment } from '../types/track';
+import { ROAD_KERB_WIDTH_M, getCuttingWallHeight, getCuttingWallOffset } from '../track/trackBoundaries';
 
 export interface RenderedSegment {
   segment: Segment;
@@ -53,7 +54,7 @@ export class RoadRenderer {
     const startSegIdx = track.getSegmentIndex(startS);
     const visibleCount = Math.min(120, Math.ceil(this.drawDistanceM / 5));
 
-    const kerbWidth = 1.35;
+    const kerbWidth = ROAD_KERB_WIDTH_M;
     const nearPlane = camera.nearPlane;
 
     // Helper: world to camera coordinates
@@ -127,13 +128,13 @@ export class RoadRenderer {
       let c1KR = toCamera(e1 + normE * (halfW + kerbWidth), n1 + normN * (halfW + kerbWidth), h1);
 
       // Flanking wall calculations (The Cutting sheer rock cliff & safety barrier)
-      const wallH0 = this.getCuttingWallHeight(seg.s_start_m);
-      const wallH1 = this.getCuttingWallHeight(seg.s_end_m);
+      const wallH0 = getCuttingWallHeight(seg.s_start_m);
+      const wallH1 = getCuttingWallHeight(seg.s_end_m);
       const hasLeftWall = wallH0 > 0 || wallH1 > 0;
       const barH0 = Math.min(1.2, wallH0);
       const barH1 = Math.min(1.2, wallH1);
 
-      const wallOffset = halfW + kerbWidth + 0.35;
+      const wallOffset = getCuttingWallOffset(seg.road_width_m);
       let c0WB = toCamera(e0 - normE * wallOffset, n0 - normN * wallOffset, h0);
       let c1WB = toCamera(e1 - normE * wallOffset, n1 - normN * wallOffset, h1);
       let c0WBar = toCamera(e0 - normE * wallOffset, n0 - normN * wallOffset, h0 + barH0);
@@ -395,22 +396,6 @@ export class RoadRenderer {
         ctx.strokeRect(rs.p0Left.x, rs.p0Left.y, rs.p0Right.x - rs.p0Left.x, 2);
       }
     }
-  }
-
-  private getCuttingWallHeight(s_m: number): number {
-    if (s_m < 1440 || s_m > 1960) return 0;
-    if (s_m < 1510) {
-      // Approach to The Cutting: wall rises from barrier height (1.2m) to full cliff (7.8m)
-      const t = (s_m - 1440) / 70;
-      return 1.2 + 6.6 * t;
-    }
-    if (s_m <= 1920) {
-      // Full sheer cutting cliff with natural rocky crest profile
-      return 7.8 + Math.sin(s_m * 0.11) * 0.45;
-    }
-    // Exit into Reid Park: cliff steps down back to barrier height
-    const t = (s_m - 1920) / 40;
-    return 7.8 - 6.6 * t;
   }
 
   private drawLeftCuttingWall(

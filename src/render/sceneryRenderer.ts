@@ -3,7 +3,7 @@ import { SpriteGenerator } from './spriteGenerator';
 import { SceneryItem } from '../types/track';
 import { TrackManager } from '../track/trackManager';
 import { RenderedSegment } from './roadRenderer';
-import { createSceneryDetail, SceneryIndex } from './sceneryDetail';
+import { createRenderScenery, SceneryIndex } from './sceneryDetail';
 
 export interface DrawableObject {
   type: 'scenery' | 'car';
@@ -21,6 +21,7 @@ export class SceneryRenderer {
   public drawables: DrawableObject[] = [];
   public showRaceWeekend: boolean = true;
   private indexes = new WeakMap<TrackManager, SceneryIndex>();
+  private wallOccluders: { points: ProjectedPoint[]; depth: number; left: number; right: number; top: number; bottom: number }[] = [];
 
   public prepareScenery(
     track: TrackManager,
@@ -33,6 +34,7 @@ export class SceneryRenderer {
     elevationExaggeration: number = 1.0
   ): void {
     this.drawables.length = 0;
+    this.wallOccluders.length = 0;
 
     // Build quick lookup for segment occlusion and clip horizons
     const occludedBySegId = new Map<number, boolean>();
@@ -40,16 +42,17 @@ export class SceneryRenderer {
     for (const rs of renderedSegments) {
       occludedBySegId.set(rs.segment.id, rs.occluded);
       clipYBySegId.set(rs.segment.id, rs.clipY);
+      if (!rs.occluded && rs.hasLeftWall && rs.p0WallBase && rs.p1WallBase && rs.p0WallTop && rs.p1WallTop) {
+        const points = [rs.p0WallBase, rs.p1WallBase, rs.p1WallTop, rs.p0WallTop];
+        this.wallOccluders.push({ points, depth: Math.max(rs.p0WallBase.depthZ, rs.p1WallBase.depthZ),
+          left: Math.min(...points.map(p => p.x)), right: Math.max(...points.map(p => p.x)),
+          top: Math.min(...points.map(p => p.y)), bottom: Math.max(...points.map(p => p.y)) });
+      }
     }
 
     let index = this.indexes.get(track);
     if (!index) {
-      // Replace generic visual placeholders only; original data/colliders remain intact.
-      const replaced = new Set(['eucalyptus', 'campground', 'camp_tent', 'pit_building', 'grandstand', 'paddock', 'hotel']);
-      index = new SceneryIndex([
-        ...track.scenery.filter(item => !replaced.has(item.sprite_key)),
-        ...createSceneryDetail(track),
-      ], track.lapLength);
+      index = new SceneryIndex(createRenderScenery(track), track.lapLength);
       this.indexes.set(track, index);
     }
     const visibleScenery = index.ahead(camera.s_m, 500);
@@ -199,6 +202,19 @@ export class SceneryRenderer {
       const sh = Math.max(1, Math.min(obj.canvas.height, Math.round((h / obj.height) * obj.canvas.height)));
       if (sw <= 0 || sh <= 0 || w <= 0 || h <= 0) continue;
 
+      // Subtract nearer wall faces from the sprite's clip region. This preserves
+      // branches above the cliff and objects in front of it, while hiding those
+      // behind. Apply each face separately so overlapping faces cannot cancel.
+      const walls = this.wallOccluders.filter(wall => wall.depth < obj.depthZ &&
+        wall.right > x && wall.left < x + w && wall.bottom > y && wall.top < y + h);
+      if (walls.length) {
+        ctx.save();
+        for (const wall of walls) {
+          ctx.beginPath(); ctx.rect(x, y, w, h);
+          wall.points.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+          ctx.closePath(); ctx.clip('evenodd');
+        }
+      }
       try {
         ctx.drawImage(
           obj.canvas,
@@ -207,6 +223,8 @@ export class SceneryRenderer {
         );
       } catch (e) {
         // Ignore any edge clipping anomalies
+      } finally {
+        if (walls.length) ctx.restore();
       }
     }
   }
