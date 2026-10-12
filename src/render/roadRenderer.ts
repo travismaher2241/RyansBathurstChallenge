@@ -293,18 +293,6 @@ export class RoadRenderer {
       ctx.lineTo(rs.p1Right.x, rs.p1Right.y);
       ctx.stroke();
 
-      // Dashed centreline
-      if (seg.id % 3 === 0) {
-        const mid0X = (rs.p0Left.x + rs.p0Right.x) * 0.5;
-        const mid0Y = (rs.p0Left.y + rs.p0Right.y) * 0.5;
-        const mid1X = (rs.p1Left.x + rs.p1Right.x) * 0.5;
-        const mid1Y = (rs.p1Left.y + rs.p1Right.y) * 0.5;
-        ctx.lineWidth = Math.max(1, 2.0 * (rs.p0Left.scale / (screenW * 0.5)));
-        ctx.beginPath();
-        ctx.moveTo(mid0X, mid0Y);
-        ctx.lineTo(mid1X, mid1Y);
-        ctx.stroke();
-      }
 
       // Finish line
       if (seg.id === 0) {
