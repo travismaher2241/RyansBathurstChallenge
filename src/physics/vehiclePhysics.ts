@@ -27,6 +27,7 @@ export class VehiclePhysics {
   public slipAngle: number = 0;
 
   // State flags
+  // State flags
   public isBraking: boolean = false;
   public isSkidding: boolean = false;
   public isOffRoad: boolean = false;
@@ -37,17 +38,53 @@ export class VehiclePhysics {
   // Curvature smoothing buffer (filters local noise from DEM reconstruction)
   private smoothedCurvature: number = 0;
 
-  // Lap Tracking
+  // Lap Tracking & Timing
   public currentLap: number = 1;
   public currentLapTime: number = 0;
   public lastLapTime: number | null = null;
   public bestLapTime: number | null = null;
-  public hasCompletedFirstLap: boolean = false;
+  public lapStarted: boolean = false;
+  public lapValid: boolean = true;
+
+  // Transmission cooldown
+  private shiftCooldownTimer: number = 0;
 
   constructor(initialS: number = 0, initialLateralM: number = 0) {
+    this.resetAll(initialS, initialLateralM);
+  }
+
+  public resetAll(initialS: number, initialLateralM: number, autoStartLap: boolean = false): void {
     this.s_m = initialS;
     this.totalDistance_m = initialS;
     this.lateralM = initialLateralM;
+    this.speedMs = 0;
+    this.gear = 1;
+    this.rpm = PHYSICS_CONFIG.idleRpm;
+    this.steerAngle = 0;
+    this.slipAngle = 0;
+    this.isBraking = false;
+    this.isSkidding = false;
+    this.isOffRoad = false;
+    this.isWallHit = false;
+    this.isGhost = false;
+    this.ghostTimer = 0;
+    this.currentLap = 1;
+    this.currentLapTime = 0;
+    this.lastLapTime = null;
+    this.bestLapTime = null;
+    this.lapStarted = autoStartLap;
+    this.lapValid = true;
+    this.shiftCooldownTimer = 0;
+    this.smoothedCurvature = 0;
+  }
+
+  public freeze(): void {
+    this.speedMs = 0;
+    this.rpm = PHYSICS_CONFIG.idleRpm;
+    this.currentLapTime = 0;
+    this.isBraking = false;
+    this.isSkidding = false;
+    this.isWallHit = false;
   }
 
   public resetToTrack(): void {
@@ -105,7 +142,9 @@ export class VehiclePhysics {
 
     // 3. Acceleration, Drag, and Braking Forces
     let throttle = inputs.throttle;
-    if (settings.autoAccelerate && throttle < 0.2 && inputs.brake < 0.1) {
+    if (throttle < 0) {
+      throttle = 0; // Frozen / countdown
+    } else if (settings.autoAccelerate && throttle < 0.2 && inputs.brake < 0.1) {
       throttle = 1.0;
     }
 
@@ -115,10 +154,11 @@ export class VehiclePhysics {
     let accelForce = 0;
     if (throttle > 0 && !isBraking) {
       const topSpeedForGear = PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] / 3.6;
-      const powerFactor = clamp(1.0 - (this.speedMs / topSpeedForGear), 0, 1);
-      // Progressive acceleration
-      const gearFactor = (7 - this.gear) / 6.0;
-      accelForce = throttle * (5.5 * gearFactor + 1.2) * (0.3 + 0.7 * powerFactor);
+      const powerFactor = clamp(1.0 - Math.pow(this.speedMs / topSpeedForGear, 1.8), 0, 1);
+      // Realistic touring car power delivery across 6 gear ratios
+      const gearAccels = [5.8, 4.6, 3.7, 3.0, 2.5, 2.15];
+      const baseAccel = gearAccels[this.gear - 1] || 2.0;
+      accelForce = throttle * (baseAccel * (0.25 + 0.75 * powerFactor) + 0.55);
     }
 
     // Aerodynamic and rolling resistance
@@ -210,47 +250,62 @@ export class VehiclePhysics {
 
     // Lap counting & timing across the timing line (s = 0)
     if (prevS > 6000 && this.s_m < 200) {
-      // Completed a lap!
       this.handleLapCompleted();
     }
 
-    this.currentLapTime += dt;
+    // Only count lap time when lap is officially started (after crossing start line)
+    if (this.lapStarted) {
+      this.currentLapTime += dt;
+    }
   }
 
   private handleLapCompleted(): void {
-    if (this.hasCompletedFirstLap) {
-      this.lastLapTime = this.currentLapTime;
+    if (!this.lapStarted) {
+      // First crossing from the starting grid: Start Lap 1 officially!
+      this.lapStarted = true;
+      this.currentLap = 1;
+      this.currentLapTime = 0;
+      this.lapValid = true;
+      return;
+    }
+
+    // Completed a full valid 6,213 m lap!
+    this.lastLapTime = this.currentLapTime;
+    if (this.lapValid) {
       if (this.bestLapTime === null || this.currentLapTime < this.bestLapTime) {
         this.bestLapTime = this.currentLapTime;
       }
-      this.currentLap++;
-    } else {
-      // Finished lap 1
-      this.hasCompletedFirstLap = true;
-      this.lastLapTime = this.currentLapTime;
-      this.bestLapTime = this.currentLapTime;
-      this.currentLap = 2;
     }
+    this.currentLap++;
     this.currentLapTime = 0;
+    this.lapValid = true;
   }
 
   private updateTransmission(dt: number, inputs: CarInputs, settings: GameSettings): void {
     const speedKmh = this.speedMs * 3.6;
 
+    if (this.shiftCooldownTimer > 0) {
+      this.shiftCooldownTimer -= dt;
+    }
+
     if (settings.transmission === 'auto') {
-      // Automatic Gearbox
-      if (this.gear < 6 && speedKmh > PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] * 0.88) {
+      // Automatic Gearbox: shift up at 91% of current gear top speed, shift down at 74%
+      if (this.gear < 6 && speedKmh > PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] * 0.91) {
         this.gear++;
-      } else if (this.gear > 1 && speedKmh < PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 2] * 0.72) {
+        this.shiftCooldownTimer = 0.22;
+      } else if (this.gear > 1 && speedKmh < PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 2] * 0.74) {
         this.gear--;
+        this.shiftCooldownTimer = 0.22;
       }
     } else {
-      // Manual Gearbox
-      if (inputs.shiftUp && this.gear < 6) {
+      // Manual Gearbox: edge-triggered with cooldown
+      if (inputs.shiftUp && this.gear < 6 && this.shiftCooldownTimer <= 0) {
         this.gear++;
+        this.shiftCooldownTimer = 0.22;
       }
-      if (inputs.shiftDown && this.gear > 1) {
+      if (inputs.shiftDown && this.gear > 1 && this.shiftCooldownTimer <= 0) {
         this.gear--;
+        this.shiftCooldownTimer = 0.22;
       }
     }
 

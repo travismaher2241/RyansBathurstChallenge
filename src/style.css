@@ -108,6 +108,30 @@ html, body {
   touch-action: none;
 }
 
+#touch-shift-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  pointer-events: auto;
+}
+#touch-shift-zone.hidden {
+  display: none !important;
+}
+
+.shift-btn {
+  width: clamp(44px, 11vh, 56px) !important;
+  height: clamp(38px, 9vh, 48px) !important;
+  font-size: clamp(14px, 3vh, 18px) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+  background: rgba(15, 23, 42, 0.75) !important;
+}
+.shift-btn:active, .shift-btn.active {
+  background: rgba(56, 189, 248, 0.5) !important;
+  color: #fff !important;
+}
+
 .touch-btn {
   width: clamp(56px, 15vh, 72px);
   height: clamp(56px, 15vh, 72px);

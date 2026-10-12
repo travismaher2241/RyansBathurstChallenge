@@ -3,7 +3,7 @@ import { RaceManager } from '../state/raceManager';
 import { AIManager } from '../ai/aiManager';
 import { TrackManager } from '../track/trackManager';
 import { formatLapTime } from '../utils/math';
-import { loadBestLapTime } from '../config/gameConfig';
+import { loadBestLapTime, GameSettings } from '../config/gameConfig';
 
 export class HUD {
   private minimapCanvas: HTMLCanvasElement;
@@ -96,6 +96,7 @@ export class HUD {
     race: RaceManager,
     ai: AIManager,
     track: TrackManager,
+    settings: GameSettings,
     isTouchDevice: boolean = false
   ): void {
     // 1. Current Track Area Notification (Toast)
@@ -152,21 +153,27 @@ export class HUD {
       ctx.fillText('/ 8', 92, 56);
     } else {
       // Time Trial / Practice Badge
-      const best = player.bestLapTime || loadBestLapTime();
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
-      ctx.fillRect(16, 16, 160, 48);
+      const best = player.bestLapTime || loadBestLapTime(settings.difficulty);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.fillRect(16, 16, 175, 54);
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2;
-      ctx.strokeRect(16, 16, 160, 48);
+      ctx.strokeRect(16, 16, 175, 54);
 
       ctx.fillStyle = '#38bdf8';
-      ctx.font = '9px monospace';
+      ctx.font = '8px monospace';
       ctx.textAlign = 'left';
-      ctx.fillText('BEST LAP', 24, 30);
+      ctx.fillText(`BEST (${settings.difficulty.toUpperCase()})`, 24, 28);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 13px monospace';
-      ctx.fillText(best ? formatLapTime(best) : '--:--.---', 24, 50);
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText(best ? formatLapTime(best) : '--:--.---', 24, 44);
+
+      if (player.lastLapTime) {
+        ctx.fillStyle = '#8ecae6';
+        ctx.font = '8px monospace';
+        ctx.fillText(`PREV: ${formatLapTime(player.lastLapTime)}`, 24, 58);
+      }
     }
 
     // 3. Top-Right: Lap & Time Cluster

@@ -23,8 +23,12 @@ export class SoundEngine {
   private isInitialized: boolean = false;
   private lastGear: number = 1;
 
-  public init(): void {
-    if (this.isInitialized) return;
+  public init(soundEnabled: boolean = true): void {
+    if (this.isInitialized) {
+      this.setMute(!soundEnabled);
+      return;
+    }
+    this.isMuted = !soundEnabled;
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new AudioCtx();
@@ -33,14 +37,27 @@ export class SoundEngine {
       this.setupRumbleSynth();
       this.setupCrowdSynth();
       this.isInitialized = true;
+      if (this.isMuted) {
+        this.ctx.suspend().catch(() => {});
+      }
     } catch (e) {
       console.warn('Web Audio not supported or blocked', e);
     }
   }
 
   public resume(): void {
+    if (this.isMuted) return;
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume().catch(() => {});
+    }
+  }
+
+  public stopAll(): void {
+    if (this.engineGain && this.ctx) {
+      this.engineGain.gain.setValueAtTime(0, this.ctx.currentTime);
+    }
+    if (this.skidGain && this.ctx) {
+      this.skidGain.gain.setValueAtTime(0, this.ctx.currentTime);
     }
   }
 
@@ -69,7 +86,7 @@ export class SoundEngine {
 
     // Distortion/Overdrive waveshaper
     const shaper = ctx.createWaveShaper();
-    shaper.curve = this.makeDistortionCurve(18);
+    shaper.curve = this.makeDistortionCurve(18) as any;
 
     // Filter to shape high touring car rasp
     this.engineFilter = ctx.createBiquadFilter();

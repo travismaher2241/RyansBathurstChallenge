@@ -31,12 +31,12 @@ export class SceneryRenderer {
   ): void {
     this.drawables.length = 0;
 
-    // Build quick lookup for segment occlusion
+    // Build quick lookup for segment occlusion and clip horizons
     const occludedBySegId = new Map<number, boolean>();
-    const renderedSegIds = new Set<number>();
+    const clipYBySegId = new Map<number, number>();
     for (const rs of renderedSegments) {
       occludedBySegId.set(rs.segment.id, rs.occluded);
-      renderedSegIds.add(rs.segment.id);
+      clipYBySegId.set(rs.segment.id, rs.clipY);
     }
 
     const visibleScenery = track.getSceneryAhead(camera.s_m, 500);
@@ -80,24 +80,46 @@ export class SceneryRenderer {
       }
       if (!sprite) continue;
 
-      // Scale sprite based on estimated world dimensions (clamp huge zones to avoid stretched images)
-      let worldW = item.width_m_estimate || (sprite.width * 0.12);
-      let worldH_est = item.height_m_estimate || (sprite.height * 0.12);
+      // Scale sprite based on realistic Bathurst circuit dimensions (in metres)
+      let worldW = item.width_m_estimate || 4.0;
+      let worldH_est = item.height_m_estimate || 4.0;
 
-      if (spriteKey === 'rock_face') {
-        worldW = Math.min(22, worldW);
-        worldH_est = Math.min(12, worldH_est);
+      if (spriteKey === 'pit_building') {
+        worldW = 28.0;
+        worldH_est = 7.0;
+      } else if (spriteKey === 'grandstand') {
+        worldW = 22.0;
+        worldH_est = 10.0;
+      } else if (spriteKey === 'paddock') {
+        worldW = 20.0;
+        worldH_est = 6.5;
+      } else if (spriteKey === 'bridge') {
+        worldW = 18.0;
+        worldH_est = 6.5;
+      } else if (spriteKey === 'hotel') {
+        worldW = 18.0;
+        worldH_est = 12.0;
+      } else if (spriteKey === 'rock_face') {
+        worldW = Math.min(24, Math.max(10, worldW));
+        worldH_est = Math.min(14, Math.max(6, worldH_est));
       } else if (spriteKey.includes('barrier')) {
-        worldW = Math.min(14, worldW);
+        worldW = 8.0;
+        worldH_est = 1.3;
+      } else if (spriteKey.includes('brake_board')) {
+        worldW = 2.2;
         worldH_est = 2.2;
       } else if (spriteKey.includes('tree') || spriteKey.includes('eucalyptus')) {
-        worldW = Math.min(14, Math.max(6, worldW));
-        worldH_est = Math.min(24, Math.max(10, worldH_est));
+        worldW = Math.min(10, Math.max(5, worldW));
+        worldH_est = Math.min(18, Math.max(8, worldH_est));
+      } else if (spriteKey.includes('tent')) {
+        worldW = 4.2;
+        worldH_est = 2.8;
       }
 
-      // Scale to screen
-      const destW = Math.max(4, worldW * (proj.scale / (screenW * 0.5)));
-      const destH = Math.max(4, worldH_est * (proj.scale / (screenW * 0.5)));
+      // True 3D perspective scale: 1 metre = proj.scale pixels on screen
+      const destW = Math.max(2, worldW * proj.scale);
+      const destH = Math.max(2, worldH_est * proj.scale);
+      const clipY = clipYBySegId.get(segId) ?? screenH;
 
       this.drawables.push({
         type: 'scenery',
@@ -107,7 +129,7 @@ export class SceneryRenderer {
         width: destW,
         height: destH,
         canvas: sprite,
-        clipY: screenH,
+        clipY: clipY,
         collidable: item.collidable,
       });
     }

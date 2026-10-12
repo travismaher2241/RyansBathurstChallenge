@@ -1,8 +1,9 @@
-import { GameMode } from '../types/track';
+import { GameMode, GameSettings } from '../types/track';
 import { VehiclePhysics } from '../physics/vehiclePhysics';
 import { AIManager, OpponentCar } from '../ai/aiManager';
 import { SoundEngine } from '../audio/soundEngine';
 import { saveBestLapTime, loadBestLapTime } from '../config/gameConfig';
+import { formatLapTime } from '../utils/math';
 
 export interface DriverStanding {
   id: number;
@@ -14,6 +15,9 @@ export interface DriverStanding {
   speedKmh: number;
   lapTime: number;
   totalTime: number;
+  finished: boolean;
+  finishTime: number | null;
+  gapText: string;
 }
 
 export class RaceManager {
@@ -30,7 +34,9 @@ export class RaceManager {
 
   public showFinalLapNotice: boolean = false;
   private finalLapNoticeTimer: number = 0;
+  public hasAnnouncedFinalLap: boolean = false;
 
+  public winnerTime: number | null = null;
   public standings: DriverStanding[] = [];
 
   constructor() {
@@ -45,50 +51,48 @@ export class RaceManager {
     this.raceElapsedTime = 0;
     this.showFinalLapNotice = false;
     this.finalLapNoticeTimer = 0;
+    this.hasAnnouncedFinalLap = false;
+    this.winnerTime = null;
 
     if (mode === 'arcade') {
       this.totalLaps = 3;
-      // Player starts at slot 8 (s = 6080m) behind the AI
-      player.s_m = 6080;
-      player.totalDistance_m = 6080;
-      player.speedMs = 0;
-      player.gear = 1;
-      player.currentLap = 1;
-      player.currentLapTime = 0;
-      player.hasCompletedFirstLap = false;
+      // Slot 8 on starting grid on Pit Straight (s = 6080m)
+      player.resetAll(6080, 2.2, false);
       ai.resetGrid();
     } else if (mode === 'timetrial') {
       this.totalLaps = 99;
-      // Start rolling or standing at start line
-      player.s_m = 6180;
-      player.totalDistance_m = 6180;
-      player.speedMs = 0;
-      player.gear = 1;
-      player.currentLap = 1;
-      player.currentLapTime = 0;
-      player.hasCompletedFirstLap = false;
+      // Standing start on Pit Straight run-up (s = 6180m)
+      player.resetAll(6180, 0, false);
     } else {
-      // Practice
+      // Practice: start directly at start line with lap 1 active
       this.totalLaps = 99;
-      player.s_m = 0;
-      player.totalDistance_m = 0;
-      player.speedMs = 0;
-      player.gear = 1;
-      player.currentLap = 1;
-      player.currentLapTime = 0;
+      player.resetAll(0, 0, true);
     }
 
+    this.updateStandings(player, ai);
     sound.playCountdown(false);
+  }
+
+  public exitToTitle(sound: SoundEngine): void {
+    this.state = 'menu';
+    this.raceElapsedTime = 0;
+    this.countdownTimer = 0;
+    this.showFinalLapNotice = false;
+    this.hasAnnouncedFinalLap = false;
+    this.winnerTime = null;
+    sound.stopAll();
   }
 
   public update(
     dt: number,
     player: VehiclePhysics,
     ai: AIManager,
-    sound: SoundEngine
+    sound: SoundEngine,
+    settings: GameSettings
   ): void {
     if (this.state === 'countdown') {
       this.updateCountdown(dt, sound);
+      player.freeze();
       return;
     }
 
@@ -96,11 +100,12 @@ export class RaceManager {
 
     this.raceElapsedTime += dt;
 
-    // Update standings
+    // Update standings and finish tracking
     this.updateStandings(player, ai);
 
-    // Final lap notice in Arcade race
-    if (this.mode === 'arcade' && player.currentLap === this.totalLaps && !this.showFinalLapNotice) {
+    // Final lap notice in Arcade race: announce ONCE
+    if (this.mode === 'arcade' && player.currentLap === this.totalLaps && !this.hasAnnouncedFinalLap) {
+      this.hasAnnouncedFinalLap = true;
       this.showFinalLapNotice = true;
       this.finalLapNoticeTimer = 4.0;
     }
@@ -112,14 +117,14 @@ export class RaceManager {
       }
     }
 
-    // Check race finish for Arcade mode
-    if (this.mode === 'arcade' && player.currentLap > this.totalLaps) {
-      this.finishRace(player, sound);
+    // Check race finish for Arcade mode (player finishes after 3 full laps)
+    if (this.mode === 'arcade' && player.currentLap > this.totalLaps && this.state === 'racing') {
+      this.finishRace(player, sound, settings);
     }
 
-    // In Time Trial mode, if player completed a lap, save best time
-    if (this.mode === 'timetrial' && player.lastLapTime) {
-      saveBestLapTime(player.lastLapTime);
+    // In Time Trial mode: save best time on valid complete laps
+    if (this.mode === 'timetrial' && player.lastLapTime && player.lapValid) {
+      saveBestLapTime(player.lastLapTime, settings.difficulty);
     }
   }
 
@@ -140,8 +145,11 @@ export class RaceManager {
     }
   }
 
-  private updateStandings(player: VehiclePhysics, ai: AIManager): void {
+  public updateStandings(player: VehiclePhysics, ai: AIManager): void {
     const list: DriverStanding[] = [];
+
+    const playerFinished = this.mode === 'arcade' && player.currentLap > this.totalLaps;
+    const playerFinishTime = playerFinished ? this.playerFinalTime || this.raceElapsedTime : null;
 
     // Add Player
     list.push({
@@ -149,11 +157,14 @@ export class RaceManager {
       name: 'Player',
       isPlayer: true,
       totalDistance: player.totalDistance_m,
-      currentLap: player.currentLap,
+      currentLap: Math.min(player.currentLap, this.totalLaps),
       position: 1,
       speedKmh: Math.round(player.speedMs * 3.6),
       lapTime: player.currentLapTime,
-      totalTime: this.raceElapsedTime,
+      totalTime: playerFinishTime || this.raceElapsedTime,
+      finished: playerFinished,
+      finishTime: playerFinishTime,
+      gapText: '',
     });
 
     // Add AI opponents if in Arcade mode
@@ -164,21 +175,52 @@ export class RaceManager {
           name: opp.name,
           isPlayer: false,
           totalDistance: opp.totalDistance_m,
-          currentLap: Math.floor(opp.totalDistance_m / 6213) + 1,
+          currentLap: Math.min(opp.currentLap, this.totalLaps),
           position: 1,
           speedKmh: Math.round(opp.speedMs * 3.6),
           lapTime: 0,
-          totalTime: this.raceElapsedTime,
+          totalTime: opp.finishTime || this.raceElapsedTime,
+          finished: opp.finished,
+          finishTime: opp.finishTime,
+          gapText: '',
         });
       }
     }
 
-    // Sort by unwrapped total distance (descending)
-    list.sort((a, b) => b.totalDistance - a.totalDistance);
+    // Sort order:
+    // 1. Finished drivers by finishTime (ascending)
+    // 2. Active drivers by totalDistance (descending)
+    list.sort((a, b) => {
+      if (a.finished && b.finished) {
+        return (a.finishTime ?? 9999) - (b.finishTime ?? 9999);
+      }
+      if (a.finished && !b.finished) return -1;
+      if (!a.finished && b.finished) return 1;
+      return b.totalDistance - a.totalDistance;
+    });
 
-    // Assign rank positions 1st to 8th
+    // Assign rank positions and calculate gaps
+    const leader = list[0];
+    if (leader && leader.finished && this.winnerTime === null) {
+      this.winnerTime = leader.finishTime;
+    }
+
     list.forEach((item, index) => {
       item.position = index + 1;
+      if (index === 0) {
+        item.gapText = item.finished ? formatLapTime(item.totalTime) : 'LEADER';
+      } else {
+        if (item.finished && leader.finished && leader.finishTime !== null && item.finishTime !== null) {
+          const gap = item.finishTime - leader.finishTime;
+          item.gapText = `+${gap.toFixed(3)}s`;
+        } else if (item.currentLap < leader.currentLap) {
+          const lapsBehind = leader.currentLap - item.currentLap;
+          item.gapText = `+${lapsBehind} LAP${lapsBehind > 1 ? 'S' : ''}`;
+        } else {
+          const distBehind = Math.max(0, leader.totalDistance - item.totalDistance);
+          item.gapText = `+${Math.round(distBehind)}m`;
+        }
+      }
     });
 
     this.standings = list;
@@ -189,14 +231,14 @@ export class RaceManager {
     return p ? p.position : 1;
   }
 
-  private finishRace(player: VehiclePhysics, sound: SoundEngine): void {
+  private finishRace(player: VehiclePhysics, sound: SoundEngine, settings: GameSettings): void {
     this.state = 'finished';
     this.playerFinalPosition = this.getPlayerPosition();
     this.playerFinalTime = this.raceElapsedTime;
     sound.playFinish();
 
-    if (player.bestLapTime) {
-      saveBestLapTime(player.bestLapTime);
+    if (player.bestLapTime && player.lapValid) {
+      saveBestLapTime(player.bestLapTime, settings.difficulty);
     }
   }
 }

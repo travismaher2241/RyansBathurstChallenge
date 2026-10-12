@@ -140,24 +140,31 @@ export class BathurstArcadeGame {
     this.ai = new AIManager();
     this.inputs = new InputManager();
     this.sound = new SoundEngine();
+    this.sound.init(this.settings.soundEnabled);
     this.race = new RaceManager();
     this.hud = new HUD(this.track);
 
     this.debug = new DebugPanel((teleportS) => {
-      this.player.s_m = teleportS;
-      this.player.totalDistance_m = teleportS;
-      this.player.speedMs = 0;
+      this.player.resetAll(teleportS, 0, false);
+      this.player.lapValid = false; // Teleport invalidates lap records
     });
 
     this.menus = new MenuManager(
       (mode) => this.startRaceMode(mode),
       () => { this.isPaused = false; this.sound.resume(); },
       () => this.restartCurrentRace(),
+      () => this.exitToTitle(),
       (newSettings) => {
         this.settings = newSettings;
         this.sound.setMute(!newSettings.soundEnabled);
+        this.updateTouchShiftButtons();
+      },
+      (teleportS) => {
+        this.player.resetAll(teleportS, 0, false);
+        this.player.lapValid = false;
       }
     );
+    this.updateTouchShiftButtons();
 
     // Check for direct launch via URL query parameter (e.g. ?mode=arcade, ?mode=practice&s=3150)
     const params = new URLSearchParams(window.location.search);
@@ -171,6 +178,7 @@ export class BathurstArcadeGame {
         if (!isNaN(sVal)) {
           this.player.s_m = wrap(sVal, this.track.lapLength);
           this.player.totalDistance_m = this.player.s_m;
+          this.player.lapValid = false;
         }
       }
     } else {
@@ -184,19 +192,40 @@ export class BathurstArcadeGame {
   }
 
   private startRaceMode(mode: GameMode): void {
-    this.sound.init();
+    this.sound.init(this.settings.soundEnabled);
     this.sound.resume();
     this.menus.hide();
     this.isPaused = false;
     this.race.startRace(mode, this.player, this.ai, this.sound);
+    this.updateTouchShiftButtons();
   }
 
   private restartCurrentRace(): void {
     this.startRaceMode(this.race.mode);
   }
 
+  private exitToTitle(): void {
+    this.isPaused = false;
+    this.race.exitToTitle(this.sound);
+    this.menus.showTitleScreen(this.settings);
+  }
+
+  private updateTouchShiftButtons(): void {
+    const shiftZone = document.getElementById('touch-shift-zone');
+    if (shiftZone) {
+      if (this.settings.transmission === 'manual') {
+        shiftZone.classList.remove('hidden');
+      } else {
+        shiftZone.classList.add('hidden');
+      }
+    }
+  }
+
   private gameLoop(time: number): void {
     requestAnimationFrame((t) => this.gameLoop(t));
+
+    // Poll global inputs (e.g. gamepad pause) on every frame whether paused or playing
+    this.inputs.pollGlobalFrame();
 
     let frameTime = (time - this.lastTime) / 1000;
     this.lastTime = time;
@@ -212,11 +241,15 @@ export class BathurstArcadeGame {
       if (this.race.state === 'racing' || this.race.state === 'countdown') {
         this.isPaused = !this.isPaused;
         if (this.isPaused) {
-          this.menus.showPauseMenu(this.settings);
+          this.menus.showPauseMenu(this.settings, this.race.mode);
         } else {
           this.menus.hide();
           this.sound.resume();
         }
+      } else if (this.isPaused) {
+        this.isPaused = false;
+        this.menus.hide();
+        this.sound.resume();
       }
     }
 
@@ -241,9 +274,9 @@ export class BathurstArcadeGame {
   private fixedUpdate(dt: number): void {
     const rawInputs = this.inputs.getInputs();
 
-    // Prevent acceleration during countdown
+    // Prevent acceleration and freeze movement during countdown
     const drivingInputs = (this.race.state === 'countdown')
-      ? { ...rawInputs, throttle: 0 }
+      ? { ...rawInputs, throttle: -1 }
       : rawInputs;
 
     // Update Player Vehicle Dynamics
@@ -253,15 +286,15 @@ export class BathurstArcadeGame {
     this.ai.update(
       dt,
       this.track,
-      this.player.s_m,
-      this.player.lateralM,
-      this.player.speedMs,
+      this.player,
       this.settings,
-      this.race.state === 'racing'
+      this.race.state === 'racing',
+      this.race.raceElapsedTime,
+      this.race.totalLaps
     );
 
     // Update Race Flow (Laps, Standings, Countdown, Checkered flag)
-    this.race.update(dt, this.player, this.ai, this.sound);
+    this.race.update(dt, this.player, this.ai, this.sound, this.settings);
 
     if (this.race.state === 'finished' && document.getElementById('ui-overlay')!.innerHTML === '') {
       this.menus.showFinishScreen(this.race, this.player, this.settings);
@@ -271,7 +304,7 @@ export class BathurstArcadeGame {
     const currentSample = this.track.sample(this.player.s_m);
     this.sound.update(
       this.player.rpm,
-      drivingInputs.throttle,
+      this.race.state === 'racing' ? drivingInputs.throttle : 0,
       this.player.gear,
       this.player.isSkidding,
       this.player.isOffRoad,
@@ -425,6 +458,15 @@ export class BathurstArcadeGame {
 
         const proj = this.camera.project(oppE, oppN, oppH, screenW, screenH, horizonY);
         if (proj.visible && proj.depthZ > this.camera.nearPlane) {
+          // Check hill crest occlusion
+          const oppSegId = oppSample.segmentId;
+          const renderedSeg = this.roadRenderer.renderedSegments.find(
+            (rs) => rs.segment.id === oppSegId
+          );
+          if (renderedSeg && renderedSeg.occluded) {
+            continue; // Hidden behind hill crest
+          }
+
           // Select AI car sprite angle
           const sprites = this.spriteGen.carSprites[opp.liveryIndex];
           let carCanvas = sprites.straight;
@@ -434,8 +476,10 @@ export class BathurstArcadeGame {
             carCanvas = opp.steerAngle < -0.3 ? sprites.slightLeft : opp.steerAngle > 0.3 ? sprites.slightRight : sprites.straight;
           }
 
-          const carScaleW = 2.1 * (proj.scale / (screenW * 0.5)); // 2.1m wide car
-          const carScaleH = 1.3 * (proj.scale / (screenW * 0.5));
+          // True 3D perspective scale: 2.1m wide, 1.3m high touring car
+          const carScaleW = Math.max(3, 2.1 * proj.scale);
+          const carScaleH = Math.max(2, 1.3 * proj.scale);
+          const clipY = renderedSeg ? renderedSeg.clipY : screenH;
 
           this.sceneryRenderer.addCarDrawable(
             proj.depthZ,
@@ -444,7 +488,7 @@ export class BathurstArcadeGame {
             carScaleW,
             carScaleH,
             carCanvas,
-            screenH
+            clipY
           );
         }
       }
@@ -481,6 +525,7 @@ export class BathurstArcadeGame {
         this.race,
         this.ai,
         this.track,
+        this.settings,
         this.inputs.isTouchDeviceActive
       );
     }

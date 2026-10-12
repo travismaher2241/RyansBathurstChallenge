@@ -17,6 +17,10 @@ export interface OpponentCar {
   isBraking: boolean;
   paceFactor: number;
   preferredLateralM: number;
+  currentLap: number;
+  lapStarted: boolean;
+  finished: boolean;
+  finishTime: number | null;
 }
 
 const AI_NAMES = [
@@ -39,10 +43,8 @@ export class AIManager {
   public resetGrid(): void {
     this.opponents = [];
     // Place 7 opponents on the starting grid ahead of the player (grid boxes behind timing line)
-    // In Bathurst, grid is on Pit Straight, staggered left and right:
+    // Staggered grid on Pit Straight: slots at 6100m, 6120m, 6140m ... 6190m
     for (let i = 0; i < AI_CONFIG.carCount; i++) {
-      const gridSlot = i + 1; // slots 1 to 7 ahead of player (who is in slot 8)
-      // Staggered grid on Pit Straight: slots at 6100m, 6120m, 6140m ... 6190m
       const s = wrap(6100 + i * 14, TRACK_LAP_LENGTH_M);
       const lateral = (i % 2 === 0) ? -2.2 : 2.2;
       const pace = 0.94 + (i * 0.015); // Leader slightly faster
@@ -61,6 +63,10 @@ export class AIManager {
         isBraking: false,
         paceFactor: pace,
         preferredLateralM: lateral,
+        currentLap: 1,
+        lapStarted: false,
+        finished: false,
+        finishTime: null,
       });
     }
   }
@@ -68,11 +74,11 @@ export class AIManager {
   public update(
     dt: number,
     track: TrackManager,
-    playerS: number,
-    playerLateralM: number,
-    playerSpeedMs: number,
+    player: { s_m: number; lateralM: number; speedMs: number; isGhost: boolean; isWallHit: boolean },
     settings: GameSettings,
-    raceStarted: boolean
+    raceStarted: boolean,
+    raceElapsedTime: number = 0,
+    totalLaps: number = 3
   ): void {
     if (!raceStarted) return;
 
@@ -94,12 +100,12 @@ export class AIManager {
 
         if (absCurv > 0.003) {
           // Corner ahead! Safe entry speed: v = sqrt(a_grip / abs(curvature))
-          const grip = 12.8 * ai.paceFactor;
+          const grip = (settings.difficulty === 'arcade' ? 14.5 : 12.8) * ai.paceFactor;
           const cornerSafeV = Math.sqrt(grip / absCurv);
           // Account for braking distance needed
           const distToCheck = step * lookStepM;
           // v_target^2 = v_safe^2 + 2 * a_brake * dist
-          const allowSpeed = Math.sqrt(cornerSafeV * cornerSafeV + 2 * 9.0 * distToCheck);
+          const allowSpeed = Math.sqrt(cornerSafeV * cornerSafeV + 2 * 9.5 * distToCheck);
           if (allowSpeed < minSafeSpeedMs) {
             minSafeSpeedMs = allowSpeed;
           }
@@ -110,16 +116,15 @@ export class AIManager {
       if (ai.speedMs > minSafeSpeedMs + 1.5) {
         // Brake firmly before entry
         ai.isBraking = true;
-        ai.speedMs = Math.max(0, ai.speedMs - 11.0 * dt);
+        ai.speedMs = Math.max(0, ai.speedMs - 11.5 * dt);
       } else {
         ai.isBraking = false;
         // Accelerate up to target speed
-        const accelRate = 4.2 * ai.paceFactor;
+        const accelRate = (settings.difficulty === 'arcade' ? 4.4 : 4.8) * ai.paceFactor;
         ai.speedMs = Math.min(minSafeSpeedMs, ai.speedMs + accelRate * dt);
       }
 
       // 3. Racing Line & Overtaking / Avoidance
-      // Target apex: on right turn, hug right (positive lateral); on left turn, hug left (negative lateral)
       let targetLateral = 0;
       if (sample.curvature > 0.003) {
         targetLateral = halfRoadW * 0.55; // Right apex
@@ -129,12 +134,11 @@ export class AIManager {
         targetLateral = ai.preferredLateralM; // Cruising lane
       }
 
-      // Avoid player if player is right ahead
-      const distToPlayer = wrap(playerS - ai.s_m, TRACK_LAP_LENGTH_M);
+      // Avoid player if player is closely ahead
+      const distToPlayer = wrap(player.s_m - ai.s_m, TRACK_LAP_LENGTH_M);
       if (distToPlayer > 0 && distToPlayer < AI_CONFIG.overtakeThresholdM) {
-        // Player is closely ahead! Steer away to overtake
-        if (Math.abs(ai.lateralM - playerLateralM) < 2.8) {
-          targetLateral = playerLateralM > 0 ? playerLateralM - 3.2 : playerLateralM + 3.2;
+        if (Math.abs(ai.lateralM - player.lateralM) < 2.8) {
+          targetLateral = player.lateralM > 0 ? player.lateralM - 3.2 : player.lateralM + 3.2;
         }
       }
 
@@ -146,8 +150,49 @@ export class AIManager {
 
       // 4. Update Distance & Lap Wrapping
       const deltaDist = ai.speedMs * dt;
+      const prevS = ai.s_m;
       ai.s_m = wrap(ai.s_m + deltaDist, TRACK_LAP_LENGTH_M);
       ai.totalDistance_m += deltaDist;
+
+      // Track AI laps
+      if (prevS > 6000 && ai.s_m < 200) {
+        if (!ai.lapStarted) {
+          ai.lapStarted = true;
+          ai.currentLap = 1;
+        } else {
+          ai.currentLap++;
+          if (ai.currentLap > totalLaps && !ai.finished) {
+            ai.finished = true;
+            ai.finishTime = raceElapsedTime;
+          }
+        }
+      }
+
+      // 5. Player-AI Physical Collision
+      if (!player.isGhost) {
+        let dS = player.s_m - ai.s_m;
+        if (dS > TRACK_LAP_LENGTH_M * 0.5) dS -= TRACK_LAP_LENGTH_M;
+        if (dS < -TRACK_LAP_LENGTH_M * 0.5) dS += TRACK_LAP_LENGTH_M;
+
+        const dLat = player.lateralM - ai.lateralM;
+
+        if (Math.abs(dS) < 4.4 && Math.abs(dLat) < 2.0) {
+          player.isWallHit = true; // Trigger contact sparks & sound
+          const pushDir = Math.sign(dLat) || (Math.random() < 0.5 ? 1 : -1);
+          const overlap = 2.0 - Math.abs(dLat);
+          player.lateralM += pushDir * overlap * 0.5;
+          ai.lateralM -= pushDir * overlap * 0.5;
+
+          // Speed exchange
+          if (dS > 0) {
+            player.speedMs = Math.max(0, player.speedMs - 4.0 * dt);
+            ai.speedMs = Math.min(PHYSICS_CONFIG.topSpeedMs, ai.speedMs + 2.5 * dt);
+          } else {
+            player.speedMs = Math.min(PHYSICS_CONFIG.topSpeedMs, player.speedMs + 2.5 * dt);
+            ai.speedMs = Math.max(0, ai.speedMs - 4.0 * dt);
+          }
+        }
+      }
 
       // Visual Gear and RPM
       ai.gear = Math.min(6, Math.max(1, Math.floor(ai.speedMs / 13) + 1));

@@ -4,6 +4,22 @@ import { VehiclePhysics } from '../physics/vehiclePhysics';
 import { saveStoredSettings } from '../config/gameConfig';
 import { formatLapTime } from '../utils/math';
 
+export const BATHURST_SECTORS = [
+  { name: 'Pit Straight (Start/Finish)', s: 0 },
+  { name: 'Hell Corner (Turn 1)', s: 310 },
+  { name: 'Mountain Straight', s: 650 },
+  { name: "Griffin's Bend (Turn 2)", s: 1450 },
+  { name: 'The Cutting (Turn 3/4)', s: 1750 },
+  { name: 'Reid Park & Sulman (Turn 5/6)', s: 2100 },
+  { name: 'McPhillamy Park (Turn 10)', s: 2700 },
+  { name: "Brock's Skyline (Turn 11)", s: 3050 },
+  { name: 'The Esses & Dipper (Turns 12-17)', s: 3300 },
+  { name: "Forrest's Elbow (Turn 18)", s: 3900 },
+  { name: 'Conrod Straight', s: 4250 },
+  { name: 'The Chase (Turns 20-22)', s: 5250 },
+  { name: "Murray's Corner (Turn 23)", s: 5850 },
+];
+
 export class MenuManager {
   private overlay: HTMLElement;
 
@@ -11,7 +27,9 @@ export class MenuManager {
     private onStartRace: (mode: GameMode) => void,
     private onResume: () => void,
     private onRestart: () => void,
-    private onSettingsChanged: (newSettings: GameSettings) => void
+    private onExitToTitle: () => void,
+    private onSettingsChanged: (newSettings: GameSettings) => void,
+    private onSectorSelect?: (s_m: number) => void
   ) {
     this.overlay = document.getElementById('ui-overlay')!;
   }
@@ -43,14 +61,15 @@ export class MenuManager {
     this.overlay.innerHTML = `
       <div class="menu-screen">
         <h1 class="menu-title">CONTROLS</h1>
-        <div style="text-align: left; margin: 20px 0; font-size: 11px; line-height: 1.8; color: #cbd5e1;">
+        <div style="text-align: left; margin: 18px 0; font-size: 11px; line-height: 1.8; color: #cbd5e1;">
           <p><strong>ACCELERATE:</strong> Up Arrow / W / Touch Gas / Gamepad RT or A</p>
           <p><strong>BRAKE:</strong> Down Arrow / S / Touch Brake / Gamepad LT or X</p>
           <p><strong>STEER:</strong> Left & Right Arrows / A & D / Touch Buttons / Gamepad Stick</p>
+          <p><strong>MANUAL SHIFT:</strong> E / Right Shift (Up), Q / Right Ctrl (Down), Gamepad RB/LB, or Touch Shift</p>
           <p><strong>HANDBRAKE:</strong> Spacebar / Gamepad B</p>
           <p><strong>RESET CAR:</strong> R key / Touch Reset / Gamepad Y</p>
-          <p><strong>PAUSE:</strong> P or Escape / Touch Pause / Gamepad Start</p>
-          <p><strong>DEBUG PANEL:</strong> ~ or \` key</p>
+          <p><strong>PAUSE / RESUME:</strong> P or Escape / Touch Pause / Gamepad Start</p>
+          <p><strong>FULLSCREEN:</strong> Touch ⛶ FULL</p>
         </div>
         <div class="menu-btn-group">
           <button id="btn-back" class="menu-btn primary">BACK</button>
@@ -66,7 +85,7 @@ export class MenuManager {
         <h1 class="menu-title">SETTINGS</h1>
 
         <div class="menu-settings-row">
-          <span>DIFFICULTY</span>
+          <label for="set-difficulty">DIFFICULTY</label>
           <select id="set-difficulty" class="menu-select">
             <option value="arcade" ${settings.difficulty === 'arcade' ? 'selected' : ''}>ARCADE (GENEROUS GRIP)</option>
             <option value="pro" ${settings.difficulty === 'pro' ? 'selected' : ''}>PRO (AUTHENTIC LIMITS)</option>
@@ -74,7 +93,7 @@ export class MenuManager {
         </div>
 
         <div class="menu-settings-row">
-          <span>GEARBOX</span>
+          <label for="set-transmission">GEARBOX</label>
           <select id="set-transmission" class="menu-select">
             <option value="auto" ${settings.transmission === 'auto' ? 'selected' : ''}>AUTOMATIC</option>
             <option value="manual" ${settings.transmission === 'manual' ? 'selected' : ''}>MANUAL (Q/E TO SHIFT)</option>
@@ -82,17 +101,17 @@ export class MenuManager {
         </div>
 
         <div class="menu-settings-row">
-          <span>AUTO-ACCELERATE</span>
+          <label for="set-auto-accel">AUTO-ACCELERATE</label>
           <input type="checkbox" id="set-auto-accel" class="menu-checkbox" ${settings.autoAccelerate ? 'checked' : ''} />
         </div>
 
         <div class="menu-settings-row">
-          <span>CRT SCANLINES</span>
+          <label for="set-crt">CRT SCANLINES</label>
           <input type="checkbox" id="set-crt" class="menu-checkbox" ${settings.crtFilter ? 'checked' : ''} />
         </div>
 
         <div class="menu-settings-row">
-          <span>AUDIO / SFX</span>
+          <label for="set-sound">AUDIO / SFX</label>
           <input type="checkbox" id="set-sound" class="menu-checkbox" ${settings.soundEnabled ? 'checked' : ''} />
         </div>
 
@@ -121,13 +140,15 @@ export class MenuManager {
     });
   }
 
-  public showPauseMenu(settings: GameSettings): void {
+  public showPauseMenu(settings: GameSettings, mode: GameMode = 'arcade'): void {
+    const isPractice = mode === 'practice';
     this.overlay.innerHTML = `
       <div class="menu-screen">
         <h1 class="menu-title">PAUSED</h1>
         <div class="menu-btn-group">
           <button id="btn-resume" class="menu-btn primary">RESUME</button>
           <button id="btn-restart" class="menu-btn">RESTART RACE</button>
+          ${isPractice ? '<button id="btn-sector-select" class="menu-btn">SELECT SECTOR / CORNER</button>' : ''}
           <button id="btn-pause-settings" class="menu-btn">SETTINGS</button>
           <button id="btn-title" class="menu-btn">EXIT TO TITLE</button>
         </div>
@@ -142,11 +163,52 @@ export class MenuManager {
       this.hide();
       this.onRestart();
     });
+    if (isPractice) {
+      document.getElementById('btn-sector-select')?.addEventListener('click', () => {
+        this.showSectorSelectScreen(settings, mode);
+      });
+    }
     document.getElementById('btn-pause-settings')?.addEventListener('click', () => {
-      this.showSettingsScreen(settings, () => this.showPauseMenu(settings));
+      this.showSettingsScreen(settings, () => this.showPauseMenu(settings, mode));
     });
     document.getElementById('btn-title')?.addEventListener('click', () => {
-      this.showTitleScreen(settings);
+      this.hide();
+      this.onExitToTitle();
+    });
+  }
+
+  public showSectorSelectScreen(settings: GameSettings, mode: GameMode): void {
+    let buttonsHtml = '';
+    BATHURST_SECTORS.forEach((sec) => {
+      buttonsHtml += `<button class="menu-btn sector-jump-btn" data-s="${sec.s}">${sec.name}</button>`;
+    });
+
+    this.overlay.innerHTML = `
+      <div class="menu-screen">
+        <h1 class="menu-title">SELECT SECTOR</h1>
+        <p class="menu-subtitle">TELEPORT DIRECTLY TO ANY CORNER OR STRAIGHT</p>
+        <div class="menu-btn-group" style="max-height: 280px; overflow-y: auto;">
+          ${buttonsHtml}
+        </div>
+        <div class="menu-btn-group" style="margin-top: 14px;">
+          <button id="btn-sector-back" class="menu-btn primary">BACK</button>
+        </div>
+      </div>
+    `;
+
+    this.overlay.querySelectorAll('.sector-jump-btn').forEach((el) => {
+      el.addEventListener('click', () => {
+        const sVal = parseFloat(el.getAttribute('data-s') || '0');
+        this.hide();
+        if (this.onSectorSelect) {
+          this.onSectorSelect(sVal);
+        }
+        this.onResume();
+      });
+    });
+
+    document.getElementById('btn-sector-back')?.addEventListener('click', () => {
+      this.showPauseMenu(settings, mode);
     });
   }
 
@@ -162,7 +224,7 @@ export class MenuManager {
         <tr class="${rowClass}">
           <td>${st.position}</td>
           <td>${st.name}</td>
-          <td>${formatLapTime(st.totalTime)}</td>
+          <td>${st.gapText || (st.finished ? formatLapTime(st.totalTime) : `${st.speedKmh} KM/H`)}</td>
           <td>${st.speedKmh} KM/H</td>
         </tr>
       `;
@@ -186,7 +248,7 @@ export class MenuManager {
               <tr>
                 <th>POS</th>
                 <th>DRIVER</th>
-                <th>TIME</th>
+                <th>GAP / TIME</th>
                 <th>SPEED</th>
               </tr>
             </thead>
@@ -208,7 +270,8 @@ export class MenuManager {
       this.onRestart();
     });
     document.getElementById('btn-menu')?.addEventListener('click', () => {
-      this.showTitleScreen(settings);
+      this.hide();
+      this.onExitToTitle();
     });
   }
 

@@ -1,4 +1,5 @@
 import { GameSettings } from '../types/track';
+export type { GameSettings };
 
 export const TRACK_LAP_LENGTH_M = 6213;
 
@@ -15,7 +16,8 @@ export const DEFAULT_SETTINGS: GameSettings = {
 };
 
 const STORAGE_KEY_SETTINGS = 'bathurst_arcade_settings_v1';
-const STORAGE_KEY_BEST_TIME = 'bathurst_arcade_best_time_v1';
+const STORAGE_KEY_BEST_TIME_ARCADE = 'bathurst_arcade_best_time_arcade_v2';
+const STORAGE_KEY_BEST_TIME_PRO = 'bathurst_arcade_best_time_pro_v2';
 
 export function loadStoredSettings(): GameSettings {
   try {
@@ -37,21 +39,25 @@ export function saveStoredSettings(settings: GameSettings): void {
   }
 }
 
-export function loadBestLapTime(): number | null {
+export function loadBestLapTime(difficulty: 'arcade' | 'pro' = 'arcade'): number | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_BEST_TIME);
+    const key = difficulty === 'pro' ? STORAGE_KEY_BEST_TIME_PRO : STORAGE_KEY_BEST_TIME_ARCADE;
+    const raw = localStorage.getItem(key);
     if (raw) return parseFloat(raw);
+    const legacy = localStorage.getItem('bathurst_arcade_best_time_v1');
+    if (legacy && difficulty === 'arcade') return parseFloat(legacy);
   } catch (e) {
     console.warn('Could not read best lap time', e);
   }
   return null;
 }
 
-export function saveBestLapTime(timeSec: number): void {
+export function saveBestLapTime(timeSec: number, difficulty: 'arcade' | 'pro' = 'arcade'): void {
   try {
-    const current = loadBestLapTime();
+    const current = loadBestLapTime(difficulty);
     if (current === null || timeSec < current) {
-      localStorage.setItem(STORAGE_KEY_BEST_TIME, timeSec.toString());
+      const key = difficulty === 'pro' ? STORAGE_KEY_BEST_TIME_PRO : STORAGE_KEY_BEST_TIME_ARCADE;
+      localStorage.setItem(key, timeSec.toString());
     }
   } catch (e) {
     console.warn('Could not save best lap time', e);

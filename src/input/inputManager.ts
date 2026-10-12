@@ -12,6 +12,13 @@ export class InputManager {
   public touchSteerRight: boolean = false;
   public touchGas: boolean = false;
   public touchBrake: boolean = false;
+  public touchShiftUp: boolean = false;
+  public touchShiftDown: boolean = false;
+
+  // Debouncing / edge detection states
+  private prevShiftUpRaw: boolean = false;
+  private prevShiftDownRaw: boolean = false;
+  private prevGamepadPause: boolean = false;
 
   private isTouchDevice: boolean = false;
 
@@ -79,13 +86,16 @@ export class InputManager {
   }
 
   private setupWindowListeners(): void {
-    // Release all active inputs when window loses focus (prevents stuck keys!)
+    // Release all active inputs and request pause when window loses focus
     window.addEventListener('blur', () => {
       this.keysDown.clear();
       this.touchSteerLeft = false;
       this.touchSteerRight = false;
       this.touchGas = false;
       this.touchBrake = false;
+      this.touchShiftUp = false;
+      this.touchShiftDown = false;
+      this.pauseRequested = true;
     });
 
     // Check orientation on mobile
@@ -100,7 +110,9 @@ export class InputManager {
     const isPortrait = window.innerHeight > window.innerWidth && window.innerWidth < 800;
     if (isPortrait) {
       rotateOverlay.classList.remove('hidden');
+      this.pauseRequested = true; // Auto-pause when rotated to portrait
     } else {
+      rotateOverlay.classList.remove('hidden');
       rotateOverlay.classList.add('hidden');
     }
   }
@@ -129,6 +141,8 @@ export class InputManager {
     bindBtn('touch-steer-right', () => { this.touchSteerRight = true; }, () => { this.touchSteerRight = false; });
     bindBtn('touch-gas', () => { this.touchGas = true; }, () => { this.touchGas = false; });
     bindBtn('touch-brake', () => { this.touchBrake = true; }, () => { this.touchBrake = false; });
+    bindBtn('touch-shift-up', () => { this.touchShiftUp = true; }, () => { this.touchShiftUp = false; });
+    bindBtn('touch-shift-down', () => { this.touchShiftDown = true; }, () => { this.touchShiftDown = false; });
 
     const btnReset = document.getElementById('touch-reset');
     if (btnReset) {
@@ -179,41 +193,40 @@ export class InputManager {
     }
   }
 
+  // Polled on every requestAnimationFrame frame (whether paused or playing)
+  public pollGlobalFrame(): void {
+    const gamepad = this.pollGamepad();
+    if (gamepad) {
+      if (gamepad.pause && !this.prevGamepadPause) {
+        this.pauseRequested = true; // Leading edge pause toggle
+      }
+      this.prevGamepadPause = gamepad.pause;
+    } else {
+      this.prevGamepadPause = false;
+    }
+  }
+
   public getInputs(): CarInputs {
     let throttle = 0;
     let brake = 0;
     let steer = 0;
     let handbrake = false;
-    let shiftUp = false;
-    let shiftDown = false;
 
     // 1. Keyboard Inputs
-    // Throttle: ArrowUp, KeyW
     if (this.keysDown.has('ArrowUp') || this.keysDown.has('KeyW') || this.keysDown.has('w')) {
       throttle = 1.0;
     }
-    // Brake / Reverse: ArrowDown, KeyS
     if (this.keysDown.has('ArrowDown') || this.keysDown.has('KeyS') || this.keysDown.has('s')) {
       brake = 1.0;
     }
-    // Steer Left: ArrowLeft, KeyA
     if (this.keysDown.has('ArrowLeft') || this.keysDown.has('KeyA') || this.keysDown.has('a')) {
       steer -= 1.0;
     }
-    // Steer Right: ArrowRight, KeyD
     if (this.keysDown.has('ArrowRight') || this.keysDown.has('KeyD') || this.keysDown.has('d')) {
       steer += 1.0;
     }
-    // Handbrake: Space
     if (this.keysDown.has('Space')) {
       handbrake = true;
-    }
-    // Gear shift keys: E / Q or Shift / Ctrl
-    if (this.keysDown.has('KeyE') || this.keysDown.has('ShiftRight')) {
-      shiftUp = true;
-    }
-    if (this.keysDown.has('KeyQ') || this.keysDown.has('ControlRight')) {
-      shiftDown = true;
     }
 
     // 2. Touch Controls Overrides
@@ -224,16 +237,27 @@ export class InputManager {
 
     // 3. Gamepad Input
     const gamepad = this.pollGamepad();
+    let gpShiftUp = false;
+    let gpShiftDown = false;
     if (gamepad) {
       if (gamepad.throttle > 0.05) throttle = Math.max(throttle, gamepad.throttle);
       if (gamepad.brake > 0.05) brake = Math.max(brake, gamepad.brake);
       if (Math.abs(gamepad.steer) > 0.05) steer = gamepad.steer;
       if (gamepad.handbrake) handbrake = true;
-      if (gamepad.shiftUp) shiftUp = true;
-      if (gamepad.shiftDown) shiftDown = true;
-      if (gamepad.pause) this.pauseRequested = true;
       if (gamepad.reset) this.resetRequested = true;
+      gpShiftUp = gamepad.shiftUp;
+      gpShiftDown = gamepad.shiftDown;
     }
+
+    // 4. Edge-triggered single gear shifts (prevents holding key from shifting all 6 gears)
+    const isShiftUpRaw = this.keysDown.has('KeyE') || this.keysDown.has('ShiftRight') || gpShiftUp || this.touchShiftUp;
+    const isShiftDownRaw = this.keysDown.has('KeyQ') || this.keysDown.has('ControlRight') || gpShiftDown || this.touchShiftDown;
+
+    const shiftUp = isShiftUpRaw && !this.prevShiftUpRaw;
+    const shiftDown = isShiftDownRaw && !this.prevShiftDownRaw;
+
+    this.prevShiftUpRaw = isShiftUpRaw;
+    this.prevShiftDownRaw = isShiftDownRaw;
 
     const reset = this.resetRequested;
     this.resetRequested = false;
@@ -255,14 +279,6 @@ export class InputManager {
     if (!gamepads || !gamepads[0]) return null;
     const gp = gamepads[0];
 
-    // Standard Gamepad mappings:
-    // Left stick X: axes[0]
-    // Right trigger (accelerate): buttons[7]
-    // Left trigger (brake): buttons[6]
-    // A button (accelerate): buttons[0]
-    // X button (brake): buttons[2]
-    // Start button (pause): buttons[9]
-    // Y button / Back (reset): buttons[3] / buttons[8]
     const steer = gp.axes[0] || 0;
     const triggerGas = gp.buttons[7] ? gp.buttons[7].value : 0;
     const buttonGas = gp.buttons[0] && gp.buttons[0].pressed ? 1.0 : 0;
