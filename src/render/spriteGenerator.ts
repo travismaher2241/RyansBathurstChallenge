@@ -194,11 +194,11 @@ export class SpriteGenerator {
     this.scenerySprites['pit_building'] = this.drawPitBuilding(280, 70);
     this.scenerySprites['grandstand'] = this.drawGrandstand(190, 85);
     this.scenerySprites['paddock'] = this.drawPaddock(140, 60);
-    this.scenerySprites['hillside_sign'] = this.drawHillsideSign(240, 48);
-    this.scenerySprites['rock_face'] = this.drawRockFace(120, 80);
+    this.scenerySprites['hillside_sign'] = this.drawHillsideSign(380, 80);
+    this.scenerySprites['rock_face'] = this.drawRockFace(260, 150);
     this.scenerySprites['campground'] = this.drawCampground(130, 60);
     this.scenerySprites['camp_tent'] = this.drawCampTent(45, 32);
-    this.scenerySprites['bridge'] = this.drawBridge(260, 85);
+    this.scenerySprites['bridge'] = this.drawBridge(340, 110);
     this.scenerySprites['hotel'] = this.drawHotel(160, 75);
     this.scenerySprites['farm'] = this.drawFarm(120, 55);
     this.scenerySprites['museum'] = this.drawMuseum(160, 65);
@@ -724,18 +724,51 @@ export class SpriteGenerator {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d')!;
-    // Mount Panorama large stone/concrete letters embedded in the grassy hillside
-    ctx.fillStyle = '#556b2f';
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '900 24px monospace';
+
+    // 1. Terraced mountain earth & grass embankment
+    ctx.fillStyle = '#3f5622'; // Lush Australian mountain hillside green
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    ctx.lineTo(12, 14);
+    ctx.lineTo(w - 12, 14);
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fill();
+
+    // Earth terracing borders
+    ctx.strokeStyle = '#574627';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(10, 15);
+    ctx.lineTo(w - 10, 15);
+    ctx.stroke();
+
+    // 2. Giant White Concrete Letters - "MOUNT PANORAMA"
+    // Deep 3D drop shadow carved into earth
+    ctx.fillStyle = '#1c1917';
+    ctx.font = '900 36px "Impact", "Arial Black", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.shadowColor = '#000000';
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetX = 3;
-    ctx.shadowOffsetY = 3;
+    ctx.fillText('MOUNT PANORAMA', w / 2 + 3, h / 2 + 5);
+
+    // Dark grey concrete bevel
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('MOUNT PANORAMA', w / 2 + 1, h / 2 + 2);
+
+    // Brilliant white stone face
+    ctx.fillStyle = '#f8fafc';
     ctx.fillText('MOUNT PANORAMA', w / 2, h / 2);
+
+    // 3. Native scrub and eucalyptus tufts along the crest
+    const busCol = ['#4d6b2c', '#607d3b', '#3b5420'];
+    for (let x = 16; x < w - 16; x += 22) {
+      const bh = 8 + ((x * 7) % 9);
+      ctx.fillStyle = busCol[(x / 22) % 3];
+      ctx.beginPath();
+      ctx.arc(x, 14, bh, Math.PI, Math.PI * 2);
+      ctx.fill();
+    }
+
     return canvas;
   }
 
@@ -744,21 +777,84 @@ export class SpriteGenerator {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d')!;
-    // The Cutting red/ochre sandstone rock face
-    ctx.fillStyle = '#8c4b2d';
-    ctx.fillRect(0, 0, w, h);
-    // Stratified rock cracks and shale layers
-    ctx.fillStyle = '#5e2f18';
-    for (let y = 8; y < h; y += 12) {
-      ctx.fillRect(0, y, w, 3);
-      for (let x = 6; x < w; x += 18) {
-        ctx.fillRect(x + ((y * 3) % 10), y - 6, 2, 10);
-      }
+
+    // 1. Craggy, irregular cliff top outline (The Cutting red sandstone)
+    ctx.fillStyle = '#9a3412'; // Base rich terracotta red-ochre
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    ctx.lineTo(0, 36);
+    // Jagged crest profile
+    ctx.lineTo(24, 22);
+    ctx.lineTo(58, 28);
+    ctx.lineTo(92, 12);
+    ctx.lineTo(130, 20);
+    ctx.lineTo(170, 8);
+    ctx.lineTo(210, 24);
+    ctx.lineTo(w - 20, 16);
+    ctx.lineTo(w, 32);
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fill();
+
+    // 2. Horizontal sedimentary rock strata (alternating ochre, ironstone, and terracotta bands)
+    const strataColors = ['#7c2d12', '#c2410c', '#431407', '#ea580c', '#b45309', '#6c240d'];
+    let curY = 32;
+    let sIdx = 0;
+    while (curY < h) {
+      const bandH = 10 + ((sIdx * 11) % 14);
+      ctx.fillStyle = strataColors[sIdx % strataColors.length];
+      ctx.beginPath();
+      ctx.moveTo(0, curY);
+      ctx.lineTo(w, curY + ((sIdx % 2 === 0) ? -4 : 4));
+      ctx.lineTo(w, Math.min(h, curY + bandH));
+      ctx.lineTo(0, Math.min(h, curY + bandH));
+      ctx.closePath();
+      ctx.fill();
+
+      // Deep horizontal fracture lines
+      ctx.strokeStyle = '#270a04';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, curY);
+      ctx.lineTo(w, curY + ((sIdx % 2 === 0) ? -4 : 4));
+      ctx.stroke();
+
+      // Sunlit highlighted shelf edges
+      ctx.strokeStyle = '#fdba74';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(4, curY + 1);
+      ctx.lineTo(w - 4, curY + 1 + ((sIdx % 2 === 0) ? -4 : 4));
+      ctx.stroke();
+
+      curY += bandH;
+      sIdx++;
     }
-    ctx.fillStyle = '#b86b43';
-    for (let y = 4; y < h; y += 12) {
-      ctx.fillRect(2, y, w - 4, 2);
+
+    // 3. Vertical stress fractures and cliff crevices
+    ctx.strokeStyle = '#1c0702';
+    ctx.lineWidth = 2;
+    for (let x = 18; x < w - 10; x += 28) {
+      const slant = ((x * 3) % 11) - 5;
+      ctx.beginPath();
+      ctx.moveTo(x, 26);
+      ctx.lineTo(x + slant, h - 10);
+      ctx.stroke();
     }
+
+    // 4. Native gum trees and scrub perched along the top cliff rim
+    for (let x = 12; x < w - 12; x += 32) {
+      const ty = 14 + ((x * 5) % 14);
+      // Small trunk
+      ctx.fillStyle = '#5c4d3c';
+      ctx.fillRect(x - 2, ty, 4, 12);
+      // Foliage
+      ctx.fillStyle = (x % 2 === 0) ? '#4d6b2c' : '#5c7835';
+      ctx.beginPath();
+      ctx.arc(x, ty - 4, 10 + ((x * 3) % 6), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     return canvas;
   }
 
@@ -817,19 +913,90 @@ export class SpriteGenerator {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d')!;
-    // Gantry bridge over track
+
+    const pillarW = 28;
+    const beamH = 34;
+
+    // 1. Concrete foundation pillars (left & right)
+    ctx.fillStyle = '#64748b'; // Concrete body
+    ctx.fillRect(0, beamH, pillarW, h - beamH);
+    ctx.fillRect(w - pillarW, beamH, pillarW, h - beamH);
+
+    // Pillar bevel highlights
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(0, beamH, 4, h - beamH);
+    ctx.fillRect(w - pillarW, beamH, 4, h - beamH);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(pillarW - 4, beamH, 4, h - beamH);
+    ctx.fillRect(w - 4, beamH, 4, h - beamH);
+
+    // 2. Yellow & Black hazard barrier bases on pillars
+    const hazardH = 36;
+    const hazardY = h - hazardH;
+    for (let p of [0, w - pillarW]) {
+      ctx.fillStyle = '#eab308'; // Warning yellow
+      ctx.fillRect(p, hazardY, pillarW, hazardH);
+      ctx.fillStyle = '#0f172a'; // Black hazard stripes
+      for (let s = 0; s < hazardH; s += 10) {
+        ctx.beginPath();
+        ctx.moveTo(p, hazardY + s);
+        ctx.lineTo(p + pillarW, hazardY + s + 8);
+        ctx.lineTo(p + pillarW, hazardY + s + 13);
+        ctx.lineTo(p, hazardY + s + 5);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    // 3. Steel overhead superstructure & catwalk trusses
     ctx.fillStyle = '#1e293b';
-    ctx.fillRect(0, 0, w, 18);
-    // Left & Right pillars
-    ctx.fillRect(0, 18, 16, h - 18);
-    ctx.fillRect(w - 16, 18, 16, h - 18);
-    // Banner
-    ctx.fillStyle = '#e11d48';
-    ctx.fillRect(16, 2, w - 32, 14);
+    ctx.fillRect(0, 0, w, beamH);
+
+    // Steel truss diagonal lattice
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 2.5;
+    for (let tx = pillarW; tx < w - pillarW; tx += 24) {
+      ctx.beginPath();
+      ctx.moveTo(tx, 4);
+      ctx.lineTo(tx + 24, beamH - 4);
+      ctx.moveTo(tx + 24, 4);
+      ctx.lineTo(tx, beamH - 4);
+      ctx.stroke();
+    }
+
+    // Catwalk guardrails
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(0, 0, w, 3);
+    ctx.fillRect(0, beamH - 2, w, 2);
+
+    // 4. Bathurst 1000 Gantry Signage
+    const signX = pillarW + 12;
+    const signW = w - (pillarW + 12) * 2;
+    const signH = 22;
+    const signY = 6;
+
+    // Vivid red & dark blue motorsport gantry banner
+    ctx.fillStyle = '#be123c'; // Repco red
+    ctx.fillRect(signX, signY, signW, signH);
+    ctx.fillStyle = '#1e3a8a'; // Deep racing navy contrast bar
+    ctx.fillRect(signX, signY + signH - 5, signW, 5);
+
+    // Frame border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(signX + 1, signY + 1, signW - 2, signH - 2);
+
+    // High-visibility gantry banner typography
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 9px monospace';
+    ctx.font = 'bold 12px "Arial Black", Impact, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('MOUNT PANORAMA • BATHURST 1000', w / 2, 12);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('REPCO • BATHURST 1000', w / 2, signY + 8);
+
+    ctx.fillStyle = '#fef08a'; // Golden yellow subtext
+    ctx.font = 'bold 8px monospace, sans-serif';
+    ctx.fillText('MOUNT PANORAMA', w / 2, signY + signH - 3);
+
     return canvas;
   }
 

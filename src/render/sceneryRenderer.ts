@@ -45,7 +45,7 @@ export class SceneryRenderer {
     let index = this.indexes.get(track);
     if (!index) {
       // Replace generic visual placeholders only; original data/colliders remain intact.
-      const replaced = new Set(['eucalyptus', 'campground', 'camp_tent', 'rock_face', 'pit_building', 'grandstand', 'paddock', 'hotel']);
+      const replaced = new Set(['eucalyptus', 'campground', 'camp_tent', 'pit_building', 'grandstand', 'paddock', 'hotel']);
       index = new SceneryIndex([
         ...track.scenery.filter(item => !replaced.has(item.sprite_key)),
         ...createSceneryDetail(track),
@@ -110,14 +110,17 @@ export class SceneryRenderer {
         worldW = 20.0;
         worldH_est = 6.5;
       } else if (spriteKey === 'bridge') {
-        worldW = 18.0;
-        worldH_est = 6.5;
+        worldW = 24.0;
+        worldH_est = 7.5;
+      } else if (spriteKey === 'hillside_sign') {
+        worldW = 85.0;
+        worldH_est = 18.0;
       } else if (spriteKey === 'hotel') {
         worldW = 18.0;
         worldH_est = 12.0;
       } else if (spriteKey === 'rock_face') {
-        worldW = Math.min(24, Math.max(10, worldW));
-        worldH_est = Math.min(14, Math.max(6, worldH_est));
+        worldW = Math.min(32, Math.max(14, worldW));
+        worldH_est = Math.min(18, Math.max(8, worldH_est));
       } else if (spriteKey.includes('barrier')) {
         worldW = 8.0;
         worldH_est = 1.3;

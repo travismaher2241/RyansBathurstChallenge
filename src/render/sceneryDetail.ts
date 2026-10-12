@@ -15,15 +15,22 @@ export function createSceneryDetail(track: TrackManager): SceneryDetail[] {
     const p = track.sample(s);
     const east = p.east_m + p.normalE * offset;
     const north = p.north_m + p.normalN * offset;
-    // Keep the entire billboard footprint clear of EVERY road segment, not just
-    // its anchor. Important on the tightly folded mountain and near pit entry.
-    for (const segment of track.segments) {
-      const dx = segment.east_end_m - segment.east_start_m;
-      const dy = segment.north_end_m - segment.north_start_m;
-      const t = Math.max(0, Math.min(1, ((east - segment.east_start_m) * dx +
-        (north - segment.north_start_m) * dy) / (dx * dx + dy * dy || 1)));
-      const distance = Math.hypot(east - segment.east_start_m - t * dx, north - segment.north_start_m - t * dy);
-      if (distance < segment.road_width_m / 2 + width / 2 + 5) return;
+
+    // Overhead bridges span directly across the road (offset ~ 0), and rock faces/signs hug the barriers or mountain.
+    const isBridge = key === 'bridge';
+    const isWallOrSign = key.includes('rock') || key.includes('bank') || key.includes('sign');
+
+    if (!isBridge) {
+      // Keep other billboard footprints clear of road segments
+      for (const segment of track.segments) {
+        const dx = segment.east_end_m - segment.east_start_m;
+        const dy = segment.north_end_m - segment.north_start_m;
+        const t = Math.max(0, Math.min(1, ((east - segment.east_start_m) * dx +
+          (north - segment.north_start_m) * dy) / (dx * dx + dy * dy || 1)));
+        const distance = Math.hypot(east - segment.east_start_m - t * dx, north - segment.north_start_m - t * dy);
+        const minDistance = isWallOrSign ? (segment.road_width_m / 2 + 1.5) : (segment.road_width_m / 2 + width / 2 + 5);
+        if (distance < minDistance) return;
+      }
     }
     result.push({
       id: `detail_${result.length}`, name: key, sprite_key: key,
@@ -71,6 +78,25 @@ export function createSceneryDetail(track: TrackManager): SceneryDetail[] {
   for (const s of [540, 830, 1030, 4060, 4730]) {
     add('country_house', s, s < 1500 ? 78 : -95, 16, 6);
   }
+  // Landmark 1: The Cutting sheer red-ochre sandstone rock face (inside left apex and climbing wall)
+  for (let s = 1380; s <= 1650; s += 28) {
+    add('rock_face', s, -14, 28, 14);
+  }
+  for (let s = 1680; s <= 1920; s += 30) {
+    add('rock_face', s, -16, 26, 12);
+  }
+
+  // Landmark 2: Giant "MOUNT PANORAMA" hillside lettering
+  // Visible climbing Mountain Straight up towards Griffin's Bend
+  add('hillside_sign', 760, -90, 85, 18);
+  // Visible across the valley from Conrod Straight
+  add('hillside_sign', 4850, 130, 85, 18);
+
+  // Landmark 3: Authentic overhead pedestrian bridges & race gantries spanning track
+  add('bridge', 6060, 0, 24, 7.5); // Pit Straight start/finish gantry
+  add('bridge', 680, 0, 24, 7.5);  // Mountain Straight pedestrian bridge
+  add('bridge', 5660, 0, 24, 7.5); // Lower Conrod Straight / Chase approach bridge
+
   // Rock banks stand behind the existing barriers. Their uneven silhouettes
   // provide slope without modifying the road mesh or its elevation.
   for (let s = 1550; s < 1940; s += 24) {
