@@ -151,7 +151,7 @@ export class RaceManager {
     const playerFinished = this.mode === 'arcade' && player.currentLap > this.totalLaps;
     const playerFinishTime = playerFinished ? this.playerFinalTime || this.raceElapsedTime : null;
 
-    const teamLabel = settings ? (settings.carChoice === 'shell' ? ' (Shell #17)' : ' (Red Bull #88)') : '';
+    const teamLabel = settings ? (settings.carChoice === 'shell' ? ' (Shell #17 - Kostecki)' : ' (Red Bull #888 - Brown)') : '';
 
     // Add Player
     list.push({

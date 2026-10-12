@@ -33,16 +33,16 @@ export interface LiveryTheme {
 }
 
 export const LIVERY_THEMES: LiveryTheme[] = [
-  // 0: Red Bull Ampol Racing #88 (Triple Eight - Chevrolet Camaro ZL1)
+  // 0: Red Bull Ampol Racing #888 (Triple Eight - Chevrolet Camaro ZL1 - Will Brown)
   {
     id: 'redbull',
-    name: 'Red Bull Ampol Racing #88',
+    name: 'Red Bull Ampol Racing #888',
     model: 'camaro',
     primary: '#04122d',       // Deep metallic midnight navy
     secondary: '#cc0028',     // Red Bull crimson
     accent: '#fdb913',        // Red Bull sun yellow
     roofColor: '#f8fafc',     // White roof
-    number: '88',
+    number: '888',
     numberBg: '#f8fafc',
     numberColor: '#04122d',
     spoilerBlade: '#04122d',
@@ -50,7 +50,7 @@ export const LIVERY_THEMES: LiveryTheme[] = [
     endplateAccent: '#fdb913',
     tailLightStyle: 'camaro_bars',
   },
-  // 1: Shell V-Power Racing Team #17 (Dick Johnson Racing - Ford Mustang GT)
+  // 1: Shell V-Power Racing Team #17 (Dick Johnson Racing - Ford Mustang GT - Brodie Kostecki)
   {
     id: 'shell',
     name: 'Shell V-Power Racing #17',
@@ -464,13 +464,14 @@ export class SpriteGenerator {
     }
 
     // 8. Supercars Competition Race Number Badge
+    const badgeW = livery.number.length >= 3 ? 34 : 28;
     ctx.fillStyle = livery.numberBg;
-    ctx.fillRect(cx - 14 + lean, baseY - 29, 28, 16);
+    ctx.fillRect(cx - badgeW / 2 + lean, baseY - 29, badgeW, 16);
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 1;
-    ctx.strokeRect(cx - 14 + lean, baseY - 29, 28, 16);
+    ctx.strokeRect(cx - badgeW / 2 + lean, baseY - 29, badgeW, 16);
     ctx.fillStyle = livery.numberColor;
-    ctx.font = 'bold 12px "Courier New", monospace';
+    ctx.font = livery.number.length >= 3 ? 'bold 10px "Courier New", monospace' : 'bold 12px "Courier New", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(livery.number, cx + lean, baseY - 21);

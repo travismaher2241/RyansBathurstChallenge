@@ -48,10 +48,10 @@ export class MenuManager {
           <div class="team-picker-title">CHOOSE YOUR V8 SUPERCAR:</div>
           <div class="team-cards-row">
             <button id="pick-redbull" class="team-card ${isRedBull ? 'active-redbull' : ''}">
-              <div class="team-card-badge redbull-bg">88</div>
+              <div class="team-card-badge redbull-bg">888</div>
               <div class="team-card-text">
                 <div class="team-card-name">RED BULL AMPOL RACING</div>
-                <div class="team-card-car">CHEVROLET CAMARO ZL1 • #88</div>
+                <div class="team-card-car">CHEVROLET CAMARO ZL1 • #888 WILL BROWN</div>
               </div>
               ${isRedBull ? '<span class="team-check">✓ SELECTED</span>' : ''}
             </button>
@@ -60,7 +60,7 @@ export class MenuManager {
               <div class="team-card-badge shell-bg">17</div>
               <div class="team-card-text">
                 <div class="team-card-name">SHELL V-POWER RACING</div>
-                <div class="team-card-car">FORD MUSTANG GT • #17</div>
+                <div class="team-card-car">FORD MUSTANG GT • #17 BRODIE KOSTECKI</div>
               </div>
               ${isShell ? '<span class="team-check">✓ SELECTED</span>' : ''}
             </button>
@@ -128,8 +128,8 @@ export class MenuManager {
         <div class="menu-settings-row">
           <label for="set-car">SUPERCAR TEAM</label>
           <select id="set-car" class="menu-select">
-            <option value="redbull" ${settings.carChoice === 'redbull' ? 'selected' : ''}>RED BULL AMPOL #88 (CAMARO ZL1)</option>
-            <option value="shell" ${settings.carChoice === 'shell' ? 'selected' : ''}>SHELL V-POWER #17 (MUSTANG GT)</option>
+            <option value="redbull" ${settings.carChoice === 'redbull' ? 'selected' : ''}>RED BULL AMPOL #888 - WILL BROWN (CAMARO ZL1)</option>
+            <option value="shell" ${settings.carChoice === 'shell' ? 'selected' : ''}>SHELL V-POWER #17 - BRODIE KOSTECKI (MUSTANG GT)</option>
           </select>
         </div>
 

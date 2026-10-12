@@ -34,7 +34,7 @@ export class AIManager {
     this.opponents = [];
     const gridRoster = playerChoice === 'redbull'
       ? [
-          { name: 'W. Davison', livery: 1 },  // Shell V-Power #17 (Arch-rival)
+          { name: 'B. Kostecki', livery: 1 }, // Shell V-Power #17 (Arch-rival)
           { name: 'C. Mostert', livery: 4 },  // Mobil 1 Optus #25
           { name: 'C. Waters', livery: 2 },   // Monster Energy #6
           { name: 'M. Payne', livery: 3 },    // Penrite Racing #19
@@ -43,7 +43,7 @@ export class AIManager {
           { name: 'N. Percat', livery: 7 },   // Bendix Racing #10
         ]
       : [
-          { name: 'B. Feeney', livery: 0 },   // Red Bull Ampol #88 (Arch-rival)
+          { name: 'W. Brown', livery: 0 },    // Red Bull Ampol #888 (Arch-rival)
           { name: 'C. Mostert', livery: 4 },  // Mobil 1 Optus #25
           { name: 'C. Waters', livery: 2 },   // Monster Energy #6
           { name: 'M. Payne', livery: 3 },    // Penrite Racing #19
