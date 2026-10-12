@@ -99,16 +99,18 @@ assert(carA_distance > carB_distance, 'Car A on lap 2 is ranked ahead of Car B o
 
 // --- GAMEPLAY REGRESSION TESTS ---
 
-// Regression 1: Minimum Valid Lap Time Sanity (Sub-95s impossible times rejected)
-const MIN_VALID_LAP_TIME_SEC = 95.0;
+// Regression 1: Minimum Valid Lap Time Sanity (Sub-2:00 / 120s impossible times rejected)
+const MIN_VALID_LAP_TIME_SEC = 120.0;
 function isValidLapTime(t) {
   return Number.isFinite(t) && t >= MIN_VALID_LAP_TIME_SEC;
 }
 assert(!isValidLapTime(7.5), 'Rejects legacy 7.5s countdown record');
 assert(!isValidLapTime(3.583), 'Rejects legacy 3.583s impossible record');
+assert(!isValidLapTime(102.0), 'Rejects exploited 1:42 (102.0s) impossible record');
 assert(!isValidLapTime(-10), 'Rejects negative lap time');
 assert(!isValidLapTime(NaN), 'Rejects NaN lap time');
-assert(isValidLapTime(138.45), 'Accepts legitimate 2:18.45 lap time');
+assert(isValidLapTime(125.50), 'Accepts legitimate 2:05.50 qualifying lap time');
+assert(isValidLapTime(138.45), 'Accepts legitimate 2:18.45 race lap time');
 
 // Regression 2: Record difficulty separation
 const mockStorage = {};
@@ -209,6 +211,20 @@ for (let f = 0; f < 120; f++) {
 }
 const finalKerbKmh = kerbTestSpeedMs * 3.6;
 assert(finalKerbKmh > 130, `Vehicle riding kerb stripes maintains high speed without stopping (actual: ${finalKerbKmh.toFixed(1)} km/h)`);
+
+// Regression 7: Lap integrity, sector checkpoints, and track limits rules
+function verifyLapIntegrity(distanceM, checkpoints, offRoadAtSpeed, wallHitAtSpeed) {
+  if (wallHitAtSpeed) return { valid: false, reason: 'WALL CONTACT' };
+  if (offRoadAtSpeed) return { valid: false, reason: 'TRACK LIMITS' };
+  const allCheckpoints = checkpoints.cutting && checkpoints.skyline && checkpoints.conrod && checkpoints.chase;
+  if (distanceM < 5800 || !allCheckpoints) return { valid: false, reason: 'MISSED SECTORS' };
+  return { valid: true, reason: null };
+}
+
+assert(verifyLapIntegrity(6213, { cutting: true, skyline: true, conrod: true, chase: true }, false, false).valid === true, 'Full clean lap is valid');
+assert(verifyLapIntegrity(6213, { cutting: true, skyline: true, conrod: true, chase: true }, false, true).valid === false, 'Lap with wall impact is invalidated');
+assert(verifyLapIntegrity(6213, { cutting: true, skyline: true, conrod: true, chase: true }, true, false).valid === false, 'Lap with track limits breach is invalidated');
+assert(verifyLapIntegrity(300, { cutting: false, skyline: false, conrod: false, chase: false }, false, false).valid === false, 'Short-cut or reversed lap is invalidated');
 
 console.log(`\nTests completed: ${passed} passed, ${failed} failed.`);
 if (failed > 0) process.exit(1);

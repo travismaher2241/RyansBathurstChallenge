@@ -178,9 +178,9 @@ export class HUD {
 
     // 3. Top-Right: Lap & Time Cluster
     const rightX = screenW - 16;
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
     ctx.fillRect(rightX - 170, 16, 170, 52);
-    ctx.strokeStyle = '#38bdf8';
+    ctx.strokeStyle = player.lapValid ? '#38bdf8' : '#ef4444';
     ctx.lineWidth = 2;
     ctx.strokeRect(rightX - 170, 16, 170, 52);
 
@@ -189,8 +189,16 @@ export class HUD {
     ctx.textAlign = 'left';
     ctx.fillText(race.mode === 'arcade' ? `LAP ${player.currentLap}/${race.totalLaps}` : `LAP ${player.currentLap}`, rightX - 160, 30);
 
-    ctx.fillStyle = '#ffffff';
+    if (!player.lapValid) {
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(player.lapInvalidReason || 'INVALID', rightX - 8, 30);
+    }
+
+    ctx.fillStyle = player.lapValid ? '#ffffff' : '#f87171';
     ctx.font = 'bold 15px monospace';
+    ctx.textAlign = 'left';
     ctx.fillText(formatLapTime(player.currentLapTime), rightX - 160, 54);
 
     // 4. Minimap with Live Dots (Upper-Left on Touch to avoid left thumb, Bottom-Left on Desktop)

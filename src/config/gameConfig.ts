@@ -40,7 +40,7 @@ export function saveStoredSettings(settings: GameSettings): void {
   }
 }
 
-export const MIN_VALID_LAP_TIME_SEC = 95.0; // Sub-1:35 is physically impossible on a 6,213m lap
+export const MIN_VALID_LAP_TIME_SEC = 120.0; // Sub-2:00 is physically impossible on a 6,213m lap (Gen3 record: 2:04.27)
 
 export function loadBestLapTime(difficulty: 'arcade' | 'pro' = 'arcade'): number | null {
   try {

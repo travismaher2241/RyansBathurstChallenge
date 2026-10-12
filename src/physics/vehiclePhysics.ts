@@ -45,7 +45,16 @@ export class VehiclePhysics {
   public bestLapTime: number | null = null;
   public lapStarted: boolean = false;
   public lapValid: boolean = true;
+  public lapInvalidReason: string | null = null;
   public lapDifficulty: 'arcade' | 'pro' = 'arcade';
+  public lapDistanceM: number = 0;
+
+  // Sector Checkpoints around Mount Panorama (prevents short-cutting or reversing cheats)
+  private cpCutting: boolean = false; // Sector 1: The Cutting (s ~ 1200-1600m)
+  private cpSkyline: boolean = false; // Sector 2: Brock's Skyline (s ~ 2800-3200m)
+  private cpConrod: boolean = false;  // Sector 3: Forrest's Elbow / Conrod (s ~ 4000-4600m)
+  private cpChase: boolean = false;   // Sector 4: The Chase (s ~ 5100-5600m)
+  private offRoadTimer: number = 0;
 
   // Transmission cooldown
   private shiftCooldownTimer: number = 0;
@@ -76,13 +85,21 @@ export class VehiclePhysics {
     this.bestLapTime = null;
     this.lapStarted = autoStartLap;
     this.lapValid = true;
+    this.lapInvalidReason = null;
+    this.lapDistanceM = 0;
+    this.cpCutting = false;
+    this.cpSkyline = false;
+    this.cpConrod = false;
+    this.cpChase = false;
+    this.offRoadTimer = 0;
     this.lapDifficulty = 'arcade';
     this.shiftCooldownTimer = 0;
     this.smoothedCurvature = 0;
   }
 
-  public invalidateCurrentLap(): void {
+  public invalidateCurrentLap(reason: string = 'LAP INVALIDATED'): void {
     this.lapValid = false;
+    this.lapInvalidReason = reason;
     this.lastLapTime = null;
     this.bestLapTime = null;
   }
@@ -230,26 +247,35 @@ export class VehiclePhysics {
       : PHYSICS_CONFIG.maxGripLatAccelMs2Pro;
 
     // Steering lateral movement (kerbs maintain high authority, grass reduces responsiveness slightly)
-    const steerFactor = this.isOffRoad ? 0.82 : (this.isOnKerb ? 0.96 : 1.0);
+    const steerFactor = this.isOffRoad ? 0.80 : (this.isOnKerb ? 0.96 : 1.0);
     const lateralSpeed = this.steerAngle * (this.speedMs * 0.32 + 3.0) * steerFactor;
     this.lateralM += lateralSpeed * dt;
 
     // Track curvature naturally pulls the car outwards if not steering enough or going too fast!
-    // Positive curvature is right turn -> pushes car left (negative lateral)
-    // Negative curvature is left turn -> pushes car right (positive lateral)
     const curveCentrifugalForce = (this.speedMs * this.speedMs) * (-this.smoothedCurvature) * 0.04;
     this.lateralM += curveCentrifugalForce * dt;
 
-    // Grip breakaway & skid detection
-    if (latDemand > maxGrip && this.speedMs > 18.0) {
+    // Grip breakaway & realistic cornering limits
+    if (latDemand > maxGrip && this.speedMs > 16.0) {
       this.isSkidding = true;
       const excessGrip = latDemand - maxGrip;
-      // Tyre scrub scrub-off drag
-      this.speedMs = Math.max(0, this.speedMs - excessGrip * PHYSICS_CONFIG.tyreScrubDragFactor * dt);
-      // Lateral slide
-      this.lateralM += (-Math.sign(this.smoothedCurvature)) * (excessGrip * 0.08) * dt;
+      // Realistic tyre scrub deceleration: overcooking corners scrubs speed heavily
+      this.speedMs = Math.max(0, this.speedMs - excessGrip * 1.5 * dt);
+      // Lateral slide towards outside of corner
+      this.lateralM += (-Math.sign(this.smoothedCurvature)) * (excessGrip * 0.18) * dt;
     } else {
       this.isSkidding = (inputs.handbrake && this.speedMs > 10.0);
+    }
+
+    // Track limits monitoring: cutting across grass at speed invalidates the lap
+    if (this.isOffRoad && this.speedMs > 15.0) {
+      this.offRoadTimer += dt;
+      if (this.offRoadTimer > 0.35) {
+        this.lapValid = false;
+        this.lapInvalidReason = 'TRACK LIMITS';
+      }
+    } else {
+      this.offRoadTimer = 0;
     }
 
     // 5. Barrier & Wall Collisions
@@ -258,32 +284,46 @@ export class VehiclePhysics {
     this.isWallHit = false;
     if (!this.isGhost) {
       if (this.lateralM > barrierLimit) {
-        this.lateralM = barrierLimit - 0.4; // Rebound away from wall
-        this.steerAngle = -0.12; // Deflect steering back onto circuit
-        this.speedMs = Math.max(0, this.speedMs - PHYSICS_CONFIG.wallScrapeDecel * dt);
+        this.lateralM = barrierLimit; // Smooth clamp without teleport judder
+        this.steerAngle = -0.15; // Deflect steering back onto circuit
+        this.speedMs = Math.max(0, this.speedMs - PHYSICS_CONFIG.wallScrapeDecel * 2.5 * dt);
         this.isWallHit = true;
+        if (this.speedMs > 10.0) {
+          this.lapValid = false;
+          this.lapInvalidReason = 'WALL CONTACT';
+        }
       } else if (this.lateralM < -barrierLimit) {
-        this.lateralM = -barrierLimit + 0.4; // Rebound away from wall
-        this.steerAngle = 0.12; // Deflect steering back onto circuit
-        this.speedMs = Math.max(0, this.speedMs - PHYSICS_CONFIG.wallScrapeDecel * dt);
+        this.lateralM = -barrierLimit; // Smooth clamp without teleport judder
+        this.steerAngle = 0.15; // Deflect steering back onto circuit
+        this.speedMs = Math.max(0, this.speedMs - PHYSICS_CONFIG.wallScrapeDecel * 2.5 * dt);
         this.isWallHit = true;
+        if (this.speedMs > 10.0) {
+          this.lapValid = false;
+          this.lapInvalidReason = 'WALL CONTACT';
+        }
       }
     }
 
-    // 6. Track Advance & Seamless Lap Seam modulo 6213
+    // 6. Track Advance & Checkpoint Verification
     const deltaS = this.speedMs * dt;
     const prevS = this.s_m;
     this.s_m = wrap(this.s_m + deltaS, TRACK_LAP_LENGTH_M);
     this.totalDistance_m += deltaS;
 
+    // Track sector checkpoints
+    if (this.s_m >= 1200 && this.s_m <= 1600) this.cpCutting = true;
+    if (this.s_m >= 2800 && this.s_m <= 3200) this.cpSkyline = true;
+    if (this.s_m >= 4000 && this.s_m <= 4600) this.cpConrod = true;
+    if (this.s_m >= 5100 && this.s_m <= 5600) this.cpChase = true;
+
+    if (this.lapStarted) {
+      this.lapDistanceM += deltaS;
+      this.currentLapTime += dt;
+    }
+
     // Lap counting & timing across the timing line (s = 0)
     if (prevS > 6000 && this.s_m < 200) {
       this.handleLapCompleted(settings.difficulty);
-    }
-
-    // Only count lap time when lap is officially started (after crossing start line)
-    if (this.lapStarted) {
-      this.currentLapTime += dt;
     }
   }
 
@@ -294,11 +334,24 @@ export class VehiclePhysics {
       this.currentLap = 1;
       this.currentLapTime = 0;
       this.lapValid = true;
+      this.lapInvalidReason = null;
+      this.lapDistanceM = 0;
+      this.cpCutting = false;
+      this.cpSkyline = false;
+      this.cpConrod = false;
+      this.cpChase = false;
       this.lapDifficulty = difficulty;
       return;
     }
 
-    // Completed a full valid 6,213 m lap!
+    // Checkpoint & distance integrity verification (prevents shortcut/reverse exploits)
+    const fullLapCompleted = this.lapDistanceM >= 5800 && this.cpCutting && this.cpSkyline && this.cpConrod && this.cpChase;
+    if (!fullLapCompleted) {
+      this.lapValid = false;
+      this.lapInvalidReason = 'MISSED SECTORS';
+    }
+
+    // Completed a full lap!
     this.lastLapTime = this.currentLapTime;
     if (this.lapValid && this.currentLapTime >= MIN_VALID_LAP_TIME_SEC) {
       if (this.bestLapTime === null || this.currentLapTime < this.bestLapTime) {
@@ -310,6 +363,12 @@ export class VehiclePhysics {
     this.currentLap++;
     this.currentLapTime = 0;
     this.lapValid = true;
+    this.lapInvalidReason = null;
+    this.lapDistanceM = 0;
+    this.cpCutting = false;
+    this.cpSkyline = false;
+    this.cpConrod = false;
+    this.cpChase = false;
     this.lapDifficulty = difficulty;
   }
 

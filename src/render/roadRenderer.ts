@@ -121,7 +121,7 @@ export class RoadRenderer {
       const z1 = (c1L.camZ + c1R.camZ) * 0.5;
 
       // If segment is completely behind camera, skip it
-      if (z0 < nearPlane && z1 < nearPlane) {
+      if (c0L.camZ < nearPlane && c0R.camZ < nearPlane && c1L.camZ < nearPlane && c1R.camZ < nearPlane) {
         continue;
       }
 
@@ -132,25 +132,41 @@ export class RoadRenderer {
       }
       previousZ = Math.max(previousZ, z1);
 
-      // Near-plane clipping: if start is behind camera, clip to nearPlane
-      if (z0 < nearPlane) {
-        const t = (nearPlane - z0) / (z1 - z0);
-        c0L = lerpPt(c0L, c1L, t);
-        c0R = lerpPt(c0R, c1R, t);
-        c0KL = lerpPt(c0KL, c1KL, t);
-        c0KR = lerpPt(c0KR, c1KR, t);
+      // Independent near-plane clipping for left and right edges (prevents vertex collapse glitches)
+      if (c0L.camZ < nearPlane && c1L.camZ > nearPlane) {
+        const tL = (nearPlane - c0L.camZ) / (c1L.camZ - c0L.camZ);
+        c0L = lerpPt(c0L, c1L, tL);
+        c0KL = lerpPt(c0KL, c1KL, tL);
+      }
+      if (c0R.camZ < nearPlane && c1R.camZ > nearPlane) {
+        const tR = (nearPlane - c0R.camZ) / (c1R.camZ - c0R.camZ);
+        c0R = lerpPt(c0R, c1R, tR);
+        c0KR = lerpPt(c0KR, c1KR, tR);
       }
 
-      // If end is behind camera, clip end to nearPlane and terminate
       let terminateAfter = false;
-      if (z1 < nearPlane) {
-        const t = (nearPlane - z0) / (z1 - z0);
-        c1L = lerpPt(c0L, c1L, t);
-        c1R = lerpPt(c0R, c1R, t);
-        c1KL = lerpPt(c0KL, c1KL, t);
-        c1KR = lerpPt(c0KR, c1KR, t);
+      if (c1L.camZ < nearPlane && c0L.camZ > nearPlane) {
+        const tL = (nearPlane - c0L.camZ) / (c1L.camZ - c0L.camZ);
+        c1L = lerpPt(c0L, c1L, tL);
+        c1KL = lerpPt(c0KL, c1KL, tL);
         terminateAfter = true;
       }
+      if (c1R.camZ < nearPlane && c0R.camZ > nearPlane) {
+        const tR = (nearPlane - c0R.camZ) / (c1R.camZ - c0R.camZ);
+        c1R = lerpPt(c0R, c1R, tR);
+        c1KR = lerpPt(c0KR, c1KR, tR);
+        terminateAfter = true;
+      }
+
+      // Clamp any micro-discrepancies to nearPlane
+      c0L.camZ = Math.max(nearPlane, c0L.camZ);
+      c0R.camZ = Math.max(nearPlane, c0R.camZ);
+      c0KL.camZ = Math.max(nearPlane, c0KL.camZ);
+      c0KR.camZ = Math.max(nearPlane, c0KR.camZ);
+      c1L.camZ = Math.max(nearPlane, c1L.camZ);
+      c1R.camZ = Math.max(nearPlane, c1R.camZ);
+      c1KL.camZ = Math.max(nearPlane, c1KL.camZ);
+      c1KR.camZ = Math.max(nearPlane, c1KR.camZ);
 
       // Project clipped points
       const p0Left = toScreen(c0L);
@@ -232,20 +248,20 @@ export class RoadRenderer {
         grassColor = isAlt ? '#475569' : '#334155';
       }
 
-      // Draw local grass strips along road verge (4m wide verge)
+      // Draw local grass verges on left and right seamlessly out to screen bounds
       ctx.fillStyle = grassColor;
       ctx.beginPath();
-      ctx.moveTo(rs.p0KerbL.x - 30, rs.p0KerbL.y);
+      ctx.moveTo(0, rs.p0KerbL.y);
       ctx.lineTo(rs.p0KerbL.x, rs.p0KerbL.y);
       ctx.lineTo(rs.p1KerbL.x, rs.p1KerbL.y);
-      ctx.lineTo(rs.p1KerbL.x - 30, rs.p1KerbL.y);
+      ctx.lineTo(0, rs.p1KerbL.y);
       ctx.closePath();
       ctx.fill();
 
       ctx.beginPath();
       ctx.moveTo(rs.p0KerbR.x, rs.p0KerbR.y);
-      ctx.lineTo(rs.p0KerbR.x + 30, rs.p0KerbR.y);
-      ctx.lineTo(rs.p1KerbR.x + 30, rs.p1KerbR.y);
+      ctx.lineTo(screenW, rs.p0KerbR.y);
+      ctx.lineTo(screenW, rs.p1KerbR.y);
       ctx.lineTo(rs.p1KerbR.x, rs.p1KerbR.y);
       ctx.closePath();
       ctx.fill();
