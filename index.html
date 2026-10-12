@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
   <title>Bathurst Arcade — Mount Panorama</title>
   <meta name="description" content="Retro pseudo-3D touring car arcade racer set at Mount Panorama, Bathurst (6,213m historic circuit)." />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -17,16 +21,24 @@
     
     <!-- Touch Controls Overlay for Mobile -->
     <div id="touch-controls" class="hidden">
+      <!-- Top Action Bar (Centered so it never collides with Lap or Position HUD) -->
+      <div id="touch-top-bar">
+        <button id="touch-pause" class="touch-action-btn" aria-label="Pause">❚❚ PAUSE</button>
+        <button id="touch-reset" class="touch-action-btn" aria-label="Reset Car">↺ RESET</button>
+        <button id="touch-fullscreen" class="touch-action-btn" aria-label="Toggle Fullscreen">⛶ FULL</button>
+      </div>
+
+      <!-- Steering Left / Right -->
       <div id="touch-left-zone">
         <button id="touch-steer-left" class="touch-btn" aria-label="Steer Left">◀</button>
         <button id="touch-steer-right" class="touch-btn" aria-label="Steer Right">▶</button>
       </div>
+
+      <!-- Pedals Brake / Gas -->
       <div id="touch-right-zone">
         <button id="touch-brake" class="touch-btn pedal-btn" aria-label="Brake">BRAKE</button>
         <button id="touch-gas" class="touch-btn pedal-btn" aria-label="Accelerate">GAS</button>
       </div>
-      <button id="touch-reset" class="touch-action-btn" aria-label="Reset Car">RESET</button>
-      <button id="touch-pause" class="touch-action-btn" aria-label="Pause">PAUSE</button>
     </div>
 
     <!-- UI Overlay for Menus & Dialogs -->

@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap');
 
+:root {
+  --app-width: 100vw;
+  --app-height: 100vh;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,27 +17,41 @@
 html, body {
   width: 100%;
   height: 100%;
+  position: fixed;
+  inset: 0;
   overflow: hidden;
   background-color: #0b0e14;
   color: #fff;
   font-family: 'Press Start 2P', monospace, sans-serif;
   touch-action: none;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
 }
 
 #game-container {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
+  width: var(--app-width, 100vw);
   height: 100vh;
+  height: 100dvh;
+  height: var(--app-height, 100dvh);
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
   background: #000;
+  overscroll-behavior: none;
 }
 
 #game-canvas {
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
@@ -50,7 +69,11 @@ html, body {
   z-index: 50;
   display: flex;
   justify-content: space-between;
-  padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 24px) env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 24px);
+  padding: max(env(safe-area-inset-top, 8px), 8px)
+           max(env(safe-area-inset-right, 16px), 16px)
+           max(env(safe-area-inset-bottom, 12px), 12px)
+           max(env(safe-area-inset-left, 16px), 16px);
+  touch-action: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -63,47 +86,64 @@ html, body {
   display: none !important;
 }
 
+/* Centered Top Action Bar */
+#touch-top-bar {
+  position: absolute;
+  top: max(env(safe-area-inset-top, 8px), 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+  z-index: 60;
+  touch-action: manipulation;
+}
+
 #touch-left-zone, #touch-right-zone {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-end;
   pointer-events: auto;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
+  touch-action: none;
 }
 
 .touch-btn {
-  width: 76px;
-  height: 76px;
-  background: rgba(18, 24, 38, 0.75);
-  border: 3px solid #ffcc00;
+  width: clamp(56px, 15vh, 72px);
+  height: clamp(56px, 15vh, 72px);
+  background: rgba(18, 24, 38, 0.65);
+  border: 2px solid #ffcc00;
   border-radius: 12px;
   color: #ffcc00;
-  font-size: 24px;
+  font-size: clamp(18px, 4.5vh, 22px);
   font-family: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   cursor: pointer;
   touch-action: manipulation;
   transition: transform 0.05s, background 0.05s;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .touch-btn:active, .touch-btn.active {
-  background: rgba(255, 204, 0, 0.4);
+  background: rgba(255, 204, 0, 0.45);
   transform: scale(0.92);
   border-color: #fff;
   color: #fff;
 }
 
 .pedal-btn {
-  width: 86px;
-  height: 86px;
-  font-size: 14px;
+  width: clamp(66px, 18vh, 82px);
+  height: clamp(66px, 18vh, 82px);
+  font-size: clamp(11px, 2.8vh, 13px);
+  font-weight: bold;
 }
 
 #touch-gas {
-  background: rgba(20, 100, 30, 0.8);
+  background: rgba(20, 100, 30, 0.75);
   border-color: #33ff66;
   color: #33ff66;
 }
@@ -113,7 +153,7 @@ html, body {
 }
 
 #touch-brake {
-  background: rgba(120, 20, 20, 0.8);
+  background: rgba(120, 20, 20, 0.75);
   border-color: #ff3344;
   color: #ff3344;
 }
@@ -123,25 +163,24 @@ html, body {
 }
 
 .touch-action-btn {
-  position: absolute;
-  top: env(safe-area-inset-top, 16px);
   pointer-events: auto;
-  background: rgba(10, 15, 25, 0.7);
-  border: 2px solid #aaa;
+  background: rgba(10, 15, 25, 0.8);
+  border: 1.5px solid #8ecae6;
   color: #fff;
-  font-size: 11px;
+  font-size: clamp(9px, 2.2vh, 11px);
   font-family: inherit;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  touch-action: manipulation;
+  transition: background 0.1s, transform 0.05s;
 }
 
-#touch-pause {
-  right: env(safe-area-inset-right, 24px);
-}
-
-#touch-reset {
-  right: calc(env(safe-area-inset-right, 24px) + 90px);
+.touch-action-btn:active {
+  background: rgba(56, 189, 248, 0.45);
+  transform: scale(0.95);
+  color: #ffb703;
 }
 
 /* UI Overlay & Modals */
@@ -164,11 +203,41 @@ html, body {
   border: 4px solid #ffb703;
   box-shadow: 0 0 35px rgba(255, 183, 3, 0.45), inset 0 0 20px rgba(0, 0, 0, 0.8);
   border-radius: 14px;
-  padding: 32px 40px;
+  padding: clamp(16px, 4vh, 32px) clamp(20px, 5vw, 40px);
   max-width: 680px;
   width: 90%;
+  max-height: 94vh;
+  overflow-y: auto;
   text-align: center;
   animation: fadeIn 0.2s ease-out;
+}
+
+@media (max-height: 480px) {
+  .menu-screen {
+    border-width: 2px;
+    padding: 12px 18px;
+    max-height: 96vh;
+  }
+  .menu-title {
+    font-size: 20px !important;
+    margin-bottom: 4px !important;
+  }
+  .menu-subtitle {
+    font-size: 10px !important;
+    margin-bottom: 12px !important;
+  }
+  .menu-btn {
+    padding: 9px 14px !important;
+    font-size: 11px !important;
+  }
+  .menu-btn-group {
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+  .menu-settings-row {
+    margin: 6px 0 !important;
+    font-size: 11px !important;
+  }
 }
 
 @keyframes fadeIn {

@@ -95,7 +95,8 @@ export class HUD {
     player: VehiclePhysics,
     race: RaceManager,
     ai: AIManager,
-    track: TrackManager
+    track: TrackManager,
+    isTouchDevice: boolean = false
   ): void {
     // 1. Current Track Area Notification (Toast)
     const currentSample = track.sample(player.s_m);
@@ -185,9 +186,9 @@ export class HUD {
     ctx.font = 'bold 15px monospace';
     ctx.fillText(formatLapTime(player.currentLapTime), rightX - 160, 54);
 
-    // 4. Bottom-Left: Minimap with Live Dots
+    // 4. Minimap with Live Dots (Upper-Left on Touch to avoid left thumb, Bottom-Left on Desktop)
     const mapDrawX = 16;
-    const mapDrawY = screenH - this.mapH - 16;
+    const mapDrawY = isTouchDevice ? 74 : (screenH - this.mapH - 16);
     ctx.drawImage(this.minimapCanvas, mapDrawX, mapDrawY);
 
     // Draw AI opponent dots on minimap
@@ -213,12 +214,12 @@ export class HUD {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // 5. Bottom-Right: Speedometer & Tachometer Cluster
+    // 5. Bottom-Right: Speedometer & Tachometer Cluster (Raised on Touch to sit comfortably above right thumb pedals)
     const speedKmh = Math.round(player.speedMs * 3.6);
     const speedW = 210;
     const speedH = 74;
     const speedX = screenW - speedW - 16;
-    const speedY = screenH - speedH - 16;
+    const speedY = isTouchDevice ? (screenH - speedH - 96) : (screenH - speedH - 16);
 
     ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
     ctx.fillRect(speedX, speedY, speedW, speedH);

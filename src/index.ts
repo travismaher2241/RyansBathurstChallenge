@@ -68,13 +68,41 @@ export class BathurstArcadeGame {
   }
 
   private setupResizeHandler(): void {
-    const resize = () => {
-      // Internal rendering resolution (960 x 540 for sharp crisp retro presentation)
+    const updateViewport = () => {
+      // 1. Maintain sharp retro 960x540 internal rendering buffer
       this.canvas.width = 960;
       this.canvas.height = 540;
+
+      // 2. Measure actual visible mobile viewport (accounting for Chrome URL bars, notch safe-areas)
+      const visibleW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+      const visibleH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+      const wPx = Math.round(visibleW);
+      const hPx = Math.round(visibleH);
+
+      document.documentElement.style.setProperty('--app-width', `${wPx}px`);
+      document.documentElement.style.setProperty('--app-height', `${hPx}px`);
+
+      const container = document.getElementById('game-container');
+      if (container) {
+        container.style.width = `${wPx}px`;
+        container.style.height = `${hPx}px`;
+      }
     };
-    window.addEventListener('resize', resize);
-    resize();
+
+    window.addEventListener('resize', updateViewport);
+    window.addEventListener('orientationchange', () => {
+      updateViewport();
+      setTimeout(updateViewport, 150);
+      setTimeout(updateViewport, 400);
+    });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateViewport);
+      window.visualViewport.addEventListener('scroll', updateViewport);
+    }
+
+    updateViewport();
   }
 
   private async init(): Promise<void> {
@@ -445,7 +473,16 @@ export class BathurstArcadeGame {
 
     // 10. Render Heads-Up Display (Minimap, Speedo, Lap Times, Position)
     if (this.race.state !== 'menu') {
-      this.hud.render(ctx, screenW, screenH, this.player, this.race, this.ai, this.track);
+      this.hud.render(
+        ctx,
+        screenW,
+        screenH,
+        this.player,
+        this.race,
+        this.ai,
+        this.track,
+        this.inputs.isTouchDeviceActive
+      );
     }
   }
 

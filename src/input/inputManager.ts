@@ -25,7 +25,7 @@ export class InputManager {
   private detectTouchDevice(): void {
     const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const hasCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    this.isTouchDevice = isMobileUserAgent || (hasCoarsePointer && window.innerWidth < 1024);
+    this.isTouchDevice = isMobileUserAgent || hasCoarsePointer || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
     const touchOverlay = document.getElementById('touch-controls');
     if (touchOverlay) {
@@ -37,10 +37,18 @@ export class InputManager {
     }
 
     // If user touches the screen anywhere, automatically enable touch controls
-    window.addEventListener('touchstart', () => {
+    const onTouch = () => {
       this.isTouchDevice = true;
       if (touchOverlay) touchOverlay.classList.remove('hidden');
-    }, { once: true });
+    };
+    window.addEventListener('touchstart', onTouch, { passive: true });
+    window.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') onTouch();
+    }, { passive: true });
+  }
+
+  public get isTouchDeviceActive(): boolean {
+    return this.isTouchDevice;
   }
 
   private setupKeyboardListeners(): void {
@@ -136,6 +144,38 @@ export class InputManager {
         e.preventDefault();
         this.pauseRequested = true;
       });
+    }
+
+    const btnFullscreen = document.getElementById('touch-fullscreen');
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else if ((document.documentElement as any).webkitRequestFullscreen) {
+            (document.documentElement as any).webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          } else if ((document as any).webkitExitFullscreen) {
+            (document as any).webkitExitFullscreen();
+          }
+        }
+      });
+
+      const updateFsLabel = () => {
+        if (document.fullscreenElement) {
+          btnFullscreen.textContent = '✕ EXIT';
+          btnFullscreen.setAttribute('aria-label', 'Exit Fullscreen');
+        } else {
+          btnFullscreen.textContent = '⛶ FULL';
+          btnFullscreen.setAttribute('aria-label', 'Toggle Fullscreen');
+        }
+      };
+      document.addEventListener('fullscreenchange', updateFsLabel);
+      document.addEventListener('webkitfullscreenchange', updateFsLabel);
     }
   }
 
