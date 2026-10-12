@@ -96,8 +96,9 @@ export class RaceManager {
     settings: GameSettings
   ): void {
     if (this.state === 'countdown') {
-      this.updateCountdown(dt, sound);
+      this.updateCountdown(dt, sound, player);
       player.freeze();
+      player.currentLapTime = 0;
       return;
     }
 
@@ -128,7 +129,7 @@ export class RaceManager {
     }
   }
 
-  private updateCountdown(dt: number, sound: SoundEngine): void {
+  private updateCountdown(dt: number, sound: SoundEngine, player?: VehiclePhysics): void {
     const prevSec = Math.ceil(this.countdownTimer);
     this.countdownTimer -= dt;
     const curSec = Math.ceil(this.countdownTimer);
@@ -142,6 +143,10 @@ export class RaceManager {
       this.state = 'racing';
       this.countdownPhase = 0; // GO!
       sound.playCountdown(true);
+      if (player) {
+        player.currentLapTime = 0;
+        player.lapDistanceM = 0;
+      }
     }
   }
 

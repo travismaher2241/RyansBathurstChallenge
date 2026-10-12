@@ -327,7 +327,7 @@ export class VehiclePhysics {
     if (this.s_m >= 4000 && this.s_m <= 4600) this.cpConrod = true;
     if (this.s_m >= 5100 && this.s_m <= 5600) this.cpChase = true;
 
-    if (this.lapStarted) {
+    if (this.lapStarted && inputs.throttle >= 0) {
       this.lapDistanceM += deltaS;
       this.currentLapTime += dt;
     }

@@ -119,4 +119,26 @@ test('Three-lap Arcade flow finishes, freezes player, and rejects invalid laps',
   assert.equal(race.state, 'finished'); assert.equal(p.currentLap, 4); assert.equal(p.speedMs, 0);
   assert.equal(race.standings.length, 8); assert.equal(loadBestLapTime(), null);
 });
+test('Lap timer stays at zero during countdown and only starts upon green light', () => {
+  const p = new VehiclePhysics(), ai = new AIManager(), race = new RaceManager();
+  race.startRace('practice', p, ai, sound, DEFAULT_SETTINGS);
+  assert.equal(race.state, 'countdown');
+  // Simulate 3 seconds of countdown
+  for (let i = 0; i < 180; i++) {
+    p.update(dt, { ...gas, throttle: -1 }, track, DEFAULT_SETTINGS);
+    race.update(dt, p, ai, sound, DEFAULT_SETTINGS);
+    assert.equal(p.currentLapTime, 0, 'Lap time must be 0 during countdown');
+  }
+  // Complete the countdown until green light
+  while (race.state === 'countdown') {
+    p.update(dt, { ...gas, throttle: -1 }, track, DEFAULT_SETTINGS);
+    race.update(dt, p, ai, sound, DEFAULT_SETTINGS);
+  }
+  assert.equal(race.state, 'racing');
+  assert.equal(p.currentLapTime, 0, 'Lap time must still be 0 right when green light triggers');
+  // First frame of racing
+  p.update(dt, gas, track, DEFAULT_SETTINGS);
+  race.update(dt, p, ai, sound, DEFAULT_SETTINGS);
+  assert.ok(p.currentLapTime > 0 && p.currentLapTime < 0.05, 'Lap time starts ticking only once racing begins');
+});
 console.log(`${passed} production-module gameplay checks passed.`);
