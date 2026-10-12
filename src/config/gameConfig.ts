@@ -89,36 +89,36 @@ export function saveBestLapTime(timeSec: number, difficulty: 'arcade' | 'pro' = 
 }
 
 export const PHYSICS_CONFIG = {
-  // Powertrain & Speed
-  topSpeedMs: 82.5, // ~297 km/h on Conrod Straight
-  reverseTopSpeedMs: 12.0,
+  // Powertrain & Speed (Official Gen3 V8 Supercars parity specifications)
+  topSpeedMs: 84.0, // ~302.4 km/h on Conrod Straight
+  reverseTopSpeedMs: 14.0,
   idleRpm: 1000,
-  maxRpm: 8200,
+  maxRpm: 8000,
   redlineRpm: 7500,
-  gearRatios: [3.4, 2.2, 1.6, 1.25, 1.0, 0.82], // 6 speeds
+  gearRatios: [3.20, 2.15, 1.58, 1.24, 1.02, 0.86], // 6-speed Xtrac sequential transaxle
   finalDrive: 3.45,
-  gearTopSpeedsKmh: [75, 125, 175, 225, 268, 302],
+  gearTopSpeedsKmh: [82, 128, 174, 222, 268, 305], // Mount Panorama drop gear ratios
 
-  // Acceleration & Drag
-  enginePowerHp: 580, // Classic Group A Sierra RS500 / V8 Supercar power
-  massKg: 1320,
-  dragCoefficient: 0.38,
-  frontalAreaM2: 2.1,
-  rollingResistance: 0.015,
-  brakeDecelerationMs2: 13.5, // Strong, communicative braking
-  handbrakeDecelMs2: 8.0,
+  // Acceleration & Aerodynamics
+  enginePowerHp: 615, // Gen3 V8 engine (5.4L DOHC Mustang GT / 5.7L LTR Camaro ZL1)
+  massKg: 1335, // Supercars regulations minimum race weight (including driver)
+  dragCoefficient: 0.39, // Gen3 high-downforce touring car aero profile
+  frontalAreaM2: 2.10,
+  rollingResistance: 0.013,
+  brakeDecelerationMs2: 14.5, // AP Racing 6-piston 395mm ventilated discs (~1.5G)
+  handbrakeDecelMs2: 9.0,
 
   // Steering & Handling
   steerRate: 2.8, // Rad/s response
   steerReturnRate: 4.2, // Self-centering rate
   steerSensitivityLowSpeed: 1.0,
-  steerSensitivityHighSpeed: 0.38, // Stabilize at 290 km/h
+  steerSensitivityHighSpeed: 0.38, // Stabilize at 300 km/h
 
   // Grip Limits & Curvature Response
-  // Lat accel = v^2 * abs(curvature). Normal touring car limits around 1.3 - 1.5 Gs (13 - 15 m/s2)
+  // Lat accel = v^2 * abs(curvature). Real Gen3 cornering limits: ~1.4 - 1.7G on Dunlop slicks
   maxGripLatAccelMs2Arcade: 16.5,
-  maxGripLatAccelMs2Pro: 13.2,
-  tyreScrubDragFactor: 0.6,
+  maxGripLatAccelMs2Pro: 13.5,
+  tyreScrubDragFactor: 0.55,
   slideRecoveryRate: 3.5,
 
   // Rumble Kerb (stripes) & Off-track grass/dirt dynamics

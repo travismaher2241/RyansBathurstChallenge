@@ -161,12 +161,19 @@ export class VehiclePhysics {
 
     let accelForce = 0;
     if (throttle > 0 && !isBraking) {
-      const topSpeedForGear = PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] / 3.6;
-      const powerFactor = clamp(1.0 - Math.pow(this.speedMs / topSpeedForGear, 1.8), 0, 1);
-      // Realistic touring car power delivery across 6 gear ratios (580hp V8 / Turbo)
-      const gearAccels = [7.5, 6.2, 5.2, 4.4, 3.8, 3.4];
-      const baseAccel = gearAccels[this.gear - 1] || 2.8;
-      accelForce = throttle * (baseAccel * (0.40 + 0.60 * powerFactor) + 1.1);
+      const currentGearTop = PHYSICS_CONFIG.gearTopSpeedsKmh[this.gear - 1] / 3.6;
+      const gearSpeedRatio = clamp(this.speedMs / currentGearTop, 0, 1.05);
+
+      // Official Gen3 615 bhp (458 kW) V8 Power Curve
+      // Delivers peak torque plateau through mid-range and maximum power before redline
+      const powerFactor = Math.max(0.72, 0.55 + 0.50 * gearSpeedRatio);
+      const wheelPowerW = 385000 * powerFactor; // Peak ~385 kW delivered to wheels
+      const effSpeed = Math.max(10.2, Math.abs(this.speedMs));
+
+      const rawAccel = (wheelPowerW / (PHYSICS_CONFIG.massKg * effSpeed)) * throttle;
+      // Launch traction limit on Dunlop 18" racing slicks (~0.85G launch)
+      const tractionLimit = 8.35;
+      accelForce = Math.min(tractionLimit, rawAccel);
     }
 
     // Aerodynamic and rolling resistance
@@ -182,8 +189,8 @@ export class VehiclePhysics {
       brakeForce += PHYSICS_CONFIG.handbrakeDecelMs2;
     }
 
-    // Gradient effect: climbing takes effort, downhill accelerates!
-    const gravityForce = -(sample.gradientPercent / 100) * 9.81 * 0.45;
+    // Gradient effect: climbing Mountain Straight vs descending down Conrod
+    const gravityForce = -(sample.gradientPercent / 100) * 9.81 * 0.95;
 
     // 3. Kerb Stripes, Off-road Grass, and Barrier Dynamics
     const kerbOuterM = halfRoadW + PHYSICS_CONFIG.kerbWidthM;

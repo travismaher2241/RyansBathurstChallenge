@@ -138,31 +138,42 @@ assert(isPaused === true, 'Repeated auto-pause (resize/rotate) remains paused wi
 onUserToggle();
 assert(isPaused === false, 'User toggle resumes game');
 
-// Regression 4: Powertrain flat-road full throttle acceleration test
-// Verify vehicle shifts out of 5th gear and exceeds 250 km/h toward top speed
-const gearTopSpeedsKmh = [75, 125, 175, 222, 262, 302];
-const gearAccels = [7.5, 6.2, 5.2, 4.4, 3.8, 3.4];
+// Regression 4: Gen3 Powertrain acceleration & top speed benchmarks
+const gearTopSpeedsKmh = [82, 128, 174, 222, 268, 305];
 let speedMs = 0;
 let gear = 1;
 const dt = 1 / 60;
-// Simulate 45 seconds of flat road full throttle
-for (let frame = 0; frame < 45 * 60; frame++) {
+let t100 = null;
+let t200 = null;
+
+// Simulate 35 seconds of flat road full throttle
+for (let frame = 0; frame < 35 * 60; frame++) {
+  const t = frame * dt;
   const speedKmh = speedMs * 3.6;
-  if (gear < 6 && speedKmh > gearTopSpeedsKmh[gear - 1] * 0.90) {
+  if (!t100 && speedKmh >= 100) t100 = t;
+  if (!t200 && speedKmh >= 200) t200 = t;
+
+  if (gear < 6 && speedKmh > gearTopSpeedsKmh[gear - 1] * 0.93) {
     gear++;
   }
-  const topSpeedForGear = gearTopSpeedsKmh[gear - 1] / 3.6;
-  const powerFactor = Math.max(0, Math.min(1, 1.0 - Math.pow(speedMs / topSpeedForGear, 1.8)));
-  const baseAccel = gearAccels[gear - 1] || 2.8;
-  const accelForce = baseAccel * (0.40 + 0.60 * powerFactor) + 1.1;
-  const aeroDrag = 0.5 * 1.225 * 0.38 * 2.1 * (speedMs * speedMs) / 1320;
-  const rollingRes = 0.015 * 9.81;
+  const currentGearTop = gearTopSpeedsKmh[gear - 1] / 3.6;
+  const gearSpeedRatio = Math.min(1.05, speedMs / currentGearTop);
+  const powerFactor = Math.max(0.72, 0.55 + 0.50 * gearSpeedRatio);
+  const wheelPowerW = 385000 * powerFactor;
+  const effSpeed = Math.max(10.2, speedMs);
+  const rawAccel = wheelPowerW / (1335 * effSpeed);
+  const accelForce = Math.min(8.35, rawAccel);
+
+  const aeroDrag = 0.5 * 1.225 * 0.39 * 2.10 * (speedMs * speedMs) / 1335;
+  const rollingRes = 0.013 * 9.81;
   const netAccel = accelForce - aeroDrag - rollingRes;
-  speedMs = Math.min(82.5, Math.max(0, speedMs + netAccel * dt));
+  speedMs = Math.min(84.0, Math.max(0, speedMs + netAccel * dt));
 }
 const finalKmh = speedMs * 3.6;
 assert(gear === 6, `Transmission reached 6th gear on flat road (current gear: ${gear})`);
-assert(finalKmh > 275, `Vehicle reaches high speed (>275 km/h) on flat road (actual: ${finalKmh.toFixed(1)} km/h)`);
+assert(t100 !== null && t100 >= 3.2 && t100 <= 3.7, `Gen3 0-100 km/h acceleration is authentic (actual: ${t100.toFixed(2)}s)`);
+assert(t200 !== null && t200 >= 8.0 && t200 <= 9.0, `Gen3 0-200 km/h acceleration is authentic (actual: ${t200.toFixed(2)}s)`);
+assert(finalKmh > 295, `Vehicle reaches Gen3 top speed (>295 km/h) on flat road (actual: ${finalKmh.toFixed(1)} km/h)`);
 
 // Regression 5: Post-finish freeze test
 let postFinishSpeed = 0;

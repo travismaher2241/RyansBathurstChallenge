@@ -125,13 +125,17 @@ export class AIManager {
 
       // 2. Throttle / Brake Control
       if (ai.speedMs > minSafeSpeedMs + 1.5) {
-        // Brake firmly before entry
+        // Brake firmly before entry with AP Racing brakes
         ai.isBraking = true;
-        ai.speedMs = Math.max(0, ai.speedMs - 11.5 * dt);
+        ai.speedMs = Math.max(0, ai.speedMs - 14.0 * dt);
       } else {
         ai.isBraking = false;
-        // Accelerate up to target speed
-        const accelRate = (settings.difficulty === 'arcade' ? 4.0 : 4.6) * ai.paceFactor;
+        // Speed-dependent Gen3 V8 acceleration rate (punchy launch tapering at high speed)
+        const baseRate = ai.speedMs < 35
+          ? (6.5 + (1 - ai.speedMs / 35) * 1.8)
+          : (3.2 + Math.max(0, 1 - ai.speedMs / 84) * 3.6);
+        const difficultyScale = settings.difficulty === 'arcade' ? 0.95 : 1.04;
+        const accelRate = baseRate * ai.paceFactor * difficultyScale;
         ai.speedMs = Math.min(minSafeSpeedMs, ai.speedMs + accelRate * dt);
       }
 
